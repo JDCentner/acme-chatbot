@@ -1,0 +1,94 @@
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #173d34;
+  background: #faf8f2;
+  font-synthesis: none;
+  --green: #173d34;
+  --cream: #faf8f2;
+  --line: #d8ded5;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .55; }
+a { color: inherit; }
+button, input, select, textarea { border: 1px solid var(--line); border-radius: 8px; }
+button { padding: 10px 15px; color: var(--green); background: white; }
+:focus-visible { outline: 3px solid #b6602e; outline-offset: 3px; }
+.demo-banner { padding: 9px 20px; background: var(--green); color: white; text-align: center; font-size: 11px; letter-spacing: 1px; }
+.site-header { max-width: 1240px; margin: auto; padding: 27px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+.brand { font-size: 30px; letter-spacing: 5px; text-decoration: none; font-weight: 600; }
+.brand span { display: block; font-size: 9px; letter-spacing: 3px; }
+nav { display: flex; align-items: center; gap: 30px; font-size: 13px; }
+nav a { text-decoration: none; }
+.quiet { background: transparent; border: 0; text-decoration: underline; font-size: 12px; }
+main { max-width: 1240px; margin: auto; }
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; padding: 65px 40px 80px; gap: 60px; align-items: center; }
+.eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 2px; }
+h1, h2, h3 { font-family: 'Libre Caslon Display', Georgia, serif; font-weight: 400; }
+h1 { font-size: clamp(54px, 6vw, 88px); line-height: 1.04; margin: 24px 0; letter-spacing: -2px; }
+.hero-copy > p:not(.eyebrow) { max-width: 410px; line-height: 1.8; color: #52665e; }
+.primary { display: inline-flex; gap: 45px; padding: 16px 22px; border: 0; border-radius: 5px; background: var(--green); color: white; text-decoration: none; font-size: 14px; }
+.caption { font-size: 11px; }
+.hero-art { position: relative; height: 460px; overflow: hidden; background: #e2e7da; border-radius: 180px 180px 8px 8px; }
+.sun { width: 115px; height: 115px; position: absolute; top: 62px; left: 70px; border-radius: 50%; background: #dca36e; }
+.arch { position: absolute; border-radius: 200px 200px 0 0; }
+.arch-one { background: #7e9680; width: 250px; height: 310px; bottom: 0; left: -20px; }
+.arch-two { background: #325c4b; width: 220px; height: 380px; bottom: -90px; right: -30px; transform: rotate(24deg); }
+.plant { position: absolute; font-size: 230px; color: #f5e8c3; bottom: 15px; left: 90px; }
+.art-caption { position: absolute; bottom: 22px; left: 26px; color: white; font-size: 11px; letter-spacing: 1px; }
+.living { padding: 30px 40px 70px; }
+h2 { font-size: 40px; margin: 12px 0 30px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+.cards article { padding: 30px 30px 0 0; }
+.card-number { font-size: 10px; color: #63796c; letter-spacing: 1px; }
+h3 { font-size: 28px; margin: 20px 0 12px; }
+.cards p, .visit p { font-size: 14px; line-height: 1.8; }
+.visit { padding: 50px 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 60px; background: #edf0e6; }
+.pricing { padding: 20px 0; }
+.pricing strong { display: block; font-size: 21px; font-weight: 500; }
+footer { max-width: 1240px; padding: 35px 40px 100px; margin: auto; font-size: 11px; color: #52665e; }
+.chat-launcher { position: fixed; bottom: 24px; right: 28px; border: 0; border-radius: 40px; background: var(--green); color: white; padding: 18px 28px; box-shadow: 0 8px 30px #173d3430; }
+.chat { position: fixed; right: 24px; bottom: 24px; width: 410px; height: min(740px, calc(100dvh - 48px)); display: flex; flex-direction: column; background: white; border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 14px 80px #122d342a; overflow: hidden; }
+.chat-header { display: flex; align-items: center; gap: 12px; background: var(--green); color: white; padding: 18px; }
+.avatar { display: grid; place-items: center; border: 1px solid #8ba598; border-radius: 50%; width: 40px; height: 40px; }
+.chat-header h2 { font-family: inherit; font-size: 16px; margin: 0 0 3px; }
+.chat-header span { font-size: 11px; color: #d2dfd5; }
+.chat-header button { margin-left: auto; background: transparent; border: 0; color: white; font-size: 25px; }
+.chat-controls { padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; border-bottom: 1px solid var(--line); }
+.chat-controls select { display: block; padding: 4px; max-width: 220px; font-size: 12px; background: white; }
+.chat-log { flex: 1; overflow-y: auto; padding: 18px; min-height: 0; }
+.bubble { padding: 12px 14px; margin: 0 20px 14px 0; background: #f1f3ec; border-radius: 0 12px 12px; font-size: 13px; }
+.bubble p { margin: 6px 0 0; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble.user { margin: 0 0 14px 40px; background: #e6ede8; border-radius: 12px 0 12px 12px; }
+.speaker { font-size: 8px; letter-spacing: 1.5px; font-weight: 700; }
+.welcome p { font-size: 13px; line-height: 1.7; }
+.suggestion { display: block; margin: 10px 0; font-size: 12px; }
+.chat form { display: flex; gap: 8px; padding: 12px 14px 0; border-top: 1px solid var(--line); }
+.chat textarea { width: 100%; resize: none; padding: 11px; height: 48px; font-size: 13px; }
+.send { background: var(--green); color: white; width: 44px; }
+.chat-note { font-size: 9px; text-align: center; color: #52665e; }
+.chat-error { background: #fff0e8; padding: 10px; font-size: 12px; }
+.checking { font-size: 12px; }
+.confirm { background: #e4eedc; margin: 6px 14px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.inspector { padding: 40px; }
+.inspect-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.inspector p { font-size: 13px; line-height: 1.8; }
+.inspector pre { padding: 20px; background: #edf0e6; max-height: 500px; overflow: auto; font-size: 11px; }
+.inspector input { padding: 10px; margin-left: 10px; }
+@media (max-width: 700px) {
+  .site-header { padding: 22px; }
+  nav { gap: 8px; }
+  nav a { display: none; }
+  .hero { grid-template-columns: 1fr; padding: 40px 22px; gap: 30px; }
+  .hero-art { height: 300px; }
+  .cards, .visit { grid-template-columns: 1fr; }
+  .living, .visit, .inspector { padding: 30px 22px; }
+  h2 { font-size: 34px; }
+  .chat { right: 8px; bottom: 8px; width: calc(100% - 16px); height: calc(100dvh - 16px); }
+  .chat-launcher { right: 16px; bottom: 16px; }
+}
