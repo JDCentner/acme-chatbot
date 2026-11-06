@@ -52,7 +52,12 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
     if (provider.mode === 'live') {
       try {
         modelGrade = gradeSchema.parse(await bounded(provider.grade({
-          transcript,
+          transcript: transcript.map((turn, index) => ({
+            turn: index + 1,
+            user: turn.user,
+            assistant: turn.assistant,
+            tools: turn.audit.tools || [],
+          })),
           facts: sandbox.facts(),
           expectations: input.expectations,
           requests,

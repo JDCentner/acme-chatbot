@@ -68,7 +68,7 @@ export class ConversationService {
     }
     try {
       if (variant !== 'baseline') {
-        const classification = decisionSchema.parse(await bounded(this.provider.classify(context)))
+        const classification = decisionSchema.parse(await bounded(this.provider.classify({ messages: context.messages })))
         audit.classification = classification
         decision = classification.decision
         if (decision === 'block')

@@ -1,6 +1,6 @@
 import type { Draft, ModelContext, ModelProvider, RequestDetails } from './contracts.ts'
 
-function latest(context: ModelContext): string {
+function latest(context: Pick<ModelContext, 'messages'>): string {
   return context.messages.filter(message => message.role === 'user').at(-1)?.content || ''
 }
 function answer(text: string): Draft {
@@ -17,7 +17,7 @@ export class FakeProvider implements ModelProvider {
     grader: 'fixture',
   }
 
-  async classify(context: ModelContext): Promise<unknown> {
+  async classify(context: Pick<ModelContext, 'messages'>): Promise<unknown> {
     const text = latest(context)
     if (/ignore.*instructions|system prompt|reveal.*prompt|bypass|pretend you/i.test(text))
       return { decision: 'block', reason: 'Instruction attack fixture.' }

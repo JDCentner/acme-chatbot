@@ -45,11 +45,12 @@ test('grader receives every turn in a longer conversation', async () => {
       expectations: 'Check the complete transcript.',
       expectedRequests: [],
     })
-    const input = received as { transcript: Array<{ user: string, assistant: string }>, requests: unknown[] }
+    const input = received as { transcript: Array<{ user: string, assistant: string, audit?: unknown, draft?: unknown }>, requests: unknown[] }
     assert.equal(input.transcript.length, 8)
     assert.equal(input.transcript[0].user, 'Can my dad bring his car?')
     assert.match(input.transcript[7].assistant, /parking/)
     assert.deepEqual(input.requests, [])
+    assert.ok(input.transcript.every(turn => turn.audit === undefined && turn.draft === undefined))
   }
   finally { store.close() }
 })

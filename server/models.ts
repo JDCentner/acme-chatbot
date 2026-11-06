@@ -51,7 +51,7 @@ export class LiveProvider implements ModelProvider {
     setTracingDisabled(true)
   }
 
-  async classify(context: ModelContext): Promise<unknown> {
+  async classify(context: Pick<ModelContext, 'messages'>): Promise<unknown> {
     return this.structured({
       name: 'Input check',
       instructions: CLASSIFIER_PROMPT,

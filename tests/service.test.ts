@@ -123,3 +123,22 @@ test('same requestId with changed text fails', async () => {
   await assert.rejects(send('car', requestId), /another message/)
   store.close()
 })
+
+test('input classification receives conversation context without community facts', async () => {
+  let input: unknown
+  const { send, store } = setup(override({
+    classify: async (context) => {
+      input = context
+      return { decision: 'allow', reason: 'A clear community question.' }
+    },
+  }))
+  try {
+    await send('Can my dad bring his car?')
+    await send('Can my mom set the temperature in her own room?')
+    const context = input as { messages: Array<{ role: string, content: string }>, facts?: unknown }
+    assert.equal(context.facts, undefined)
+    assert.ok(context.messages.some(message => message.content === 'Can my dad bring his car?'))
+    assert.equal(context.messages.at(-1)?.content, 'Can my mom set the temperature in her own room?')
+  }
+  finally { store.close() }
+})
