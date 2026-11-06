@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { Actions, isConfirmation } from './actions.ts'
 import { BLOCK_REPLY, CLARIFY_REPLY, decisionSchema, DEMO_CAPABILITIES, draftSchema, FALLBACK_REPLY, MAX_MODEL_TEXT_LENGTH, messageSchema, PROMPT_VERSION, RETRY_REPLY, reviewSchema } from './contracts.ts'
 import { bounded, LiveProvider } from './models.ts'
+import { localNow } from './time.ts'
 
 export class HttpError extends Error {
   constructor(readonly status: number, message: string) {
@@ -53,7 +54,7 @@ export class ConversationService {
     }
     const context: ModelContext = {
       facts: this.store.facts(),
-      now: this.store.clock().toISOString(),
+      now: localNow(this.store.clock).toISO()!,
       messages: [
         ...this.store.context(conversationId),
         { role: 'user', content: input.message },

@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const MAX_MESSAGE_LENGTH = 4_000
 export const MAX_MODEL_TEXT_LENGTH = 8_000
 export const TIME_ZONE = 'America/New_York'
-export const PROMPT_VERSION = 'acme-2.1'
+export const PROMPT_VERSION = 'acme-2.2'
 export const BLOCK_REPLY = 'I can help with questions about ACME Senior Living, tours, or contacting our team.'
 export const CLARIFY_REPLY = 'Could you tell me how I can help with ACME Senior Living?'
 export const RETRY_REPLY = 'I could not check your message. Please try again.'

@@ -16,6 +16,8 @@ const context: ModelContext = {
   capabilities: DEMO_CAPABILITIES,
   requestState: { checkedSlots: [], savedRequests: [] },
   messages: [
+    { role: 'user', content: 'I would like a tour next Tuesday at 2pm.' },
+    { role: 'assistant', content: 'What is your email address?' },
     { role: 'user', content: 'Please use corrected@example.com for my request. I also need to ask about my dog and care options.' },
   ],
 }

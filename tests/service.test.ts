@@ -167,3 +167,23 @@ test('input classification receives conversation context without community facts
   }
   finally { store.close() }
 })
+
+test('agent clock uses the New York date when UTC is already on the next day', async () => {
+  const store = new Store(':memory:', () => new Date('2026-11-06T02:00:00Z'))
+  const conversation = store.createConversation()
+  let receivedClock: string | undefined
+  const provider = override({
+    draft: async (context) => {
+      receivedClock = context.now
+      return { text: 'What time would you prefer?', tools: [] }
+    },
+  })
+  try {
+    await new ConversationService(store, provider).submit(conversation.id, {
+      message: 'I want a callback tomorrow.',
+      requestId: randomUUID(),
+    })
+    assert.equal(receivedClock, '2026-11-05T21:00:00.000-05:00')
+  }
+  finally { store.close() }
+})
