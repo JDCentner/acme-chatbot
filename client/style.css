@@ -72,11 +72,6 @@ footer { max-width: 1240px; padding: 35px 40px 100px; margin: auto; font-size: 1
 .checking { font-size: 12px; }
 .confirm { background: #e4eedc; margin: 6px 14px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.inspector { padding: 40px; }
-.inspect-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.inspector p { font-size: 13px; line-height: 1.8; }
-.inspector pre { padding: 20px; background: #edf0e6; max-height: 500px; overflow: auto; font-size: 11px; }
-.inspector input { padding: 10px; margin-left: 10px; }
 @media (max-width: 700px) {
   .site-header { padding: 22px; }
   nav { gap: 8px; }
@@ -150,13 +145,7 @@ footer { max-width: 1240px; padding: 35px 40px 100px; margin: auto; font-size: 1
   margin-top: 8px;
 }
 
-.review-header {
-  padding: 40px 40px 0;
-}
 
-.review-header h1 {
-  font-size: 48px;
-}
 
 @media (max-width: 700px) {
   nav .nav-contact {

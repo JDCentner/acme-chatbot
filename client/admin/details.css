@@ -1,0 +1,123 @@
+.timeline-title {
+  margin-top: 30px;
+}
+
+.admin-turn {
+  border: 1px solid #e0e6dc;
+  border-radius: 7px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.admin-turn-heading {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #f6f8f3;
+  font-size: 11px;
+}
+
+.admin-turn-heading > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  font-size: 9px;
+  color: #748273;
+}
+
+.transcript-user, .transcript-assistant {
+  padding: 16px;
+}
+
+.transcript-user {
+  border-bottom: 1px solid #edf0e9;
+}
+
+.transcript-user > span, .transcript-assistant > span {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #7d8c7d;
+  font-weight: 700;
+}
+
+.transcript-user p, .transcript-assistant p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+
+.transcript-assistant {
+  background: #f9fbf7;
+}
+
+.turn-evidence {
+  padding: 14px 16px;
+  border-top: 1px solid #e7ece2;
+}
+
+.turn-evidence summary, .admin-raw summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: #55724c;
+}
+
+.turn-evidence p {
+  font-size: 11px;
+}
+
+.draft-text {
+  padding: 14px;
+  background: #f8f3e8;
+  border-left: 2px solid #c6ab75;
+  white-space: pre-wrap;
+}
+
+.admin-raw {
+  margin: 18px 0 4px;
+}
+
+.admin-raw pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f4f6ef;
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 10px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.request-details {
+  margin-top: 26px;
+}
+
+.request-details > div {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e5ebe1;
+}
+
+.request-details dt {
+  font-size: 11px;
+  color: #73816e;
+}
+
+.request-details dd {
+  margin: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

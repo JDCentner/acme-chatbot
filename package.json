@@ -15,7 +15,8 @@
     "eval": "promptfoo eval -c evals/promptfooconfig.yaml --no-cache",
     "eval:view": "promptfoo view --port 15500",
     "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@openai/agents": "^0.21.0",

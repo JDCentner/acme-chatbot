@@ -1,0 +1,251 @@
+:root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #243b36;
+  background: #f5f7f5;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: .5;
+}
+
+:focus-visible {
+  outline: 3px solid #aa653e;
+  outline-offset: 3px;
+}
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 20px;
+  background: #153d34;
+  color: #e4eee8;
+}
+
+.admin-brand {
+  padding: 0 14px;
+  text-decoration: none;
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: 4px;
+}
+
+.admin-brand span {
+  display: block;
+  font-size: 8px;
+  margin-top: 7px;
+  letter-spacing: 2px;
+  color: #b0c5b9;
+}
+
+.admin-sidebar-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  margin: 58px 14px 16px;
+  color: #b0c5b9;
+}
+
+.admin-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.admin-sidebar nav button {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font-size: 13px;
+}
+
+.admin-sidebar nav button span {
+  font-size: 10px;
+  color: #9fb7a9;
+  padding-top: 2px;
+}
+
+.admin-sidebar nav button[aria-current] {
+  background: #31574b;
+  color: white;
+}
+
+.admin-sidebar-footer {
+  margin-top: auto;
+  padding: 30px 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-size: 11px;
+}
+
+.admin-sidebar-footer a {
+  text-decoration: none;
+}
+
+.admin-sidebar-footer p {
+  font-size: 9px;
+  color: #b0c5b9;
+}
+
+.admin-main {
+  min-width: 0;
+}
+
+.admin-topbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 22px 36px;
+  border-bottom: 1px solid #dfe6e0;
+  background: white;
+  font-size: 11px;
+  color: #5c7068;
+}
+
+.admin-content {
+  max-width: 1500px;
+  margin: auto;
+  padding: 38px 36px;
+}
+
+.admin-section-heading {
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.admin-eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.7px;
+  color: #657d70;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-size: 29px;
+  font-weight: 550;
+  letter-spacing: -.8px;
+  margin: 0 0 13px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+h3 {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+h4 {
+  font-size: 12px;
+  margin: 16px 0 7px;
+}
+
+p {
+  line-height: 1.65;
+  font-size: 13px;
+}
+
+.admin-section-heading p:not(.admin-eyebrow) {
+  color: #60756b;
+  max-width: 610px;
+  margin: 0;
+}
+
+.admin-primary, .admin-secondary {
+  border: 1px solid #ced9d0;
+  border-radius: 7px;
+  padding: 11px 16px;
+  font-size: 12px;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+  background: white;
+  color: #243b36;
+}
+
+.admin-primary {
+  border-color: #194a3b;
+  color: white;
+  background: #194a3b;
+}
+
+.admin-current {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 18px;
+  padding: 16px 20px;
+  border: 1px solid #d7e2d8;
+  background: #edf2eb;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.admin-current strong {
+  margin-left: 14px;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 4px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .1px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  background: #edf0ee;
+  color: #607168;
+}
+
+.admin-badge.good {
+  background: #e2f0e7;
+  color: #256147;
+}
+
+.admin-badge.bad {
+  background: #f8e6e1;
+  color: #9c4833;
+}
+
