@@ -19,9 +19,9 @@ export function Chat({ isOpen, onClose }: ChatProps) {
     logRef.current?.scrollTo(0, logRef.current.scrollHeight)
   }, [messages, isBusy])
   useEffect(() => {
-    if (isOpen)
+    if (isOpen && !isBusy)
       inputRef.current?.focus()
-  }, [isOpen])
+  }, [isOpen, isBusy])
   async function send(message: string) {
     if (!message.trim() || isBusy)
       return
@@ -47,7 +47,7 @@ export function Chat({ isOpen, onClose }: ChatProps) {
             message,
             requestId: crypto.randomUUID(),
           }
-      if (!retryRef.current) {
+      if (retryRef.current?.message !== message) {
         setMessages(previous => [
           ...previous,
           {
