@@ -14,7 +14,9 @@ providers:
     label: Sophie + specialists
     config:
       variant: specialists
-tests: file://cases.yaml
+tests:
+  - file://cases.yaml
+  - file://conversations.yaml
 evaluateOptions:
   maxConcurrency: 1
   cache: false

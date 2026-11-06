@@ -11,6 +11,9 @@ class AcmeProvider {
         variant: this.config.variant,
         messages: JSON.parse(context.vars.messages),
         expectations: context.vars.expectations,
+        expectedRequests: context.vars.expectedRequests === undefined
+          ? undefined
+          : JSON.parse(context.vars.expectedRequests),
       }),
     })
     const run = await response.json()
