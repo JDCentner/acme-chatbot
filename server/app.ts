@@ -4,12 +4,14 @@ import type { Variant } from './models.ts'
 import type { Store } from './store.ts'
 import express from 'express'
 import { z } from 'zod'
+import { adminRoutes } from './admin.ts'
 import { evaluate } from './evaluations.ts'
 import { ConversationService, HttpError } from './service.ts'
 
 export function createApp(store: Store, provider: ModelProvider, variant: Variant = 'single') {
   const app = express()
   const service = new ConversationService(store, provider)
+  app.get('/admin', (_request, response) => response.redirect('/admin.html'))
   app.disable('x-powered-by')
   app.use((_request, response, next) => {
     response.setHeader('Cache-Control', 'no-store')
@@ -28,17 +30,19 @@ export function createApp(store: Store, provider: ModelProvider, variant: Varian
   app.get('/api/community', (_request, response) => response.json({
     facts: store.facts(),
   }))
-  app.post('/api/conversations', (_request, response) => response.status(201).json(store.createConversation()))
+  app.post('/api/conversations', (_request, response) => response.status(201).json(store.createConversation(store.activeVariant(variant))))
   app.post('/api/conversations/:id/messages', async (request, response) => {
     if (request.query.variant !== undefined)
       throw new HttpError(400, 'This setting is controlled by the server.')
-    response.json(await service.submit(String(request.params.id), request.body, variant))
+    response.json(await service.submit(String(request.params.id), request.body, store.conversationVariant(String(request.params.id), store.activeVariant(variant))))
   })
+  app.use('/api/admin', adminRoutes({ store, provider, defaultVariant: variant }))
   app.get('/api/conversations', (_request, response) => response.json(store.conversations()))
   app.get('/api/conversations/:id', (request, response) => {
     if (!z.uuid().safeParse(request.params.id).success || !store.hasConversation(String(request.params.id)))
       throw new HttpError(404, 'Conversation not found.')
     response.json({
+      variant: store.conversationVariant(String(request.params.id), store.activeVariant(variant)),
       turns: store.turns(String(request.params.id)),
       pending: store.pending(String(request.params.id)),
     })

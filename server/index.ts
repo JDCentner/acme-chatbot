@@ -2,15 +2,14 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import express from 'express'
 import { createApp } from './app.ts'
-import { createProvider, variantSchema } from './models.ts'
+import { createProvider } from './models.ts'
 import { Store } from './store.ts'
 
 async function start(): Promise<void> {
   const port = Number(process.env.PORT || 3000)
   const store = new Store(process.env.DATABASE_PATH || 'data/acme.sqlite')
   const provider = createProvider()
-  const variant = variantSchema.parse(process.env.AGENT_VARIANT || 'single')
-  const app = createApp(store, provider, variant)
+  const app = createApp(store, provider)
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(resolve('dist')))
   }

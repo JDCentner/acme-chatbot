@@ -1,4 +1,5 @@
 import type { RequestDetails, TranscriptMessage } from './contracts.ts'
+import type { Variant } from './models.ts'
 import { randomUUID } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
@@ -46,8 +47,12 @@ export class Store {
       PRAGMA foreign_keys = ON;
       PRAGMA journal_mode = WAL;
       PRAGMA busy_timeout = 5000;
+      CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS facts (id INTEGER PRIMARY KEY CHECK(id=1), content TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS conversations (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, greeting TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS conversation_variants (
+        conversation_id TEXT PRIMARY KEY REFERENCES conversations(id), variant TEXT NOT NULL
+      );
       CREATE TABLE IF NOT EXISTS turns (
         id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversations(id), request_id TEXT NOT NULL,
         input TEXT NOT NULL, decision TEXT, reply TEXT, audit TEXT NOT NULL, created_at TEXT NOT NULL,
@@ -87,9 +92,11 @@ export class Store {
     return JSON.parse(row.content)
   }
 
-  createConversation(): { id: string, greeting: string } {
+  createConversation(variant?: Variant): { id: string, greeting: string } {
     const id = randomUUID()
     this.database.prepare('INSERT INTO conversations VALUES (?, ?, ?)').run(id, this.clock().toISOString(), GREETING)
+    if (variant)
+      this.database.prepare('INSERT INTO conversation_variants VALUES (?, ?)').run(id, variant)
     return { id, greeting: GREETING }
   }
 
@@ -162,7 +169,7 @@ export class Store {
   }
 
   conversations(): unknown[] {
-    return this.database.prepare('SELECT c.*, COUNT(t.id) AS turn_count FROM conversations c LEFT JOIN turns t ON t.conversation_id=c.id GROUP BY c.id ORDER BY c.rowid DESC').all()
+    return this.database.prepare('SELECT c.*, COUNT(t.id) AS turn_count, (SELECT input FROM turns first_turn WHERE first_turn.conversation_id=c.id ORDER BY first_turn.rowid LIMIT 1) AS first_message FROM conversations c LEFT JOIN turns t ON t.conversation_id=c.id GROUP BY c.id ORDER BY c.rowid DESC').all()
   }
 
   cases(): unknown[] {
@@ -189,6 +196,32 @@ export class Store {
 
   runs(): unknown[] {
     return this.database.prepare('SELECT content FROM evaluation_runs ORDER BY rowid DESC LIMIT 100').all().map(row => JSON.parse(String(row.content)))
+  }
+
+  activeVariant(fallback: Variant): Variant {
+    const row = this.database.prepare('SELECT value FROM settings WHERE key=?').get('active_variant') as { value: Variant } | undefined
+    return row?.value || fallback
+  }
+
+  setActiveVariant(variant: Variant): void {
+    this.database.prepare('INSERT INTO settings VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run('active_variant', variant)
+  }
+
+  conversationVariant(id: string, fallback: Variant): Variant {
+    const row = this.database.prepare('SELECT variant FROM conversation_variants WHERE conversation_id=?').get(id) as { variant: Variant } | undefined
+    if (row)
+      return row.variant
+    const firstTurn = this.turns(id)[0]
+    return firstTurn
+      ? JSON.parse(firstTurn.audit).variant || fallback
+      : fallback
+  }
+
+  evaluation(id: string): Record<string, unknown> | undefined {
+    const row = this.database.prepare('SELECT content FROM evaluation_runs WHERE id=?').get(id) as { content: string } | undefined
+    return row
+      ? JSON.parse(row.content)
+      : undefined
   }
 
   close(): void {
