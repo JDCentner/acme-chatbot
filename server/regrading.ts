@@ -61,9 +61,12 @@ export async function regradeSavedRun(input: { store: Store, provider: ModelProv
     grading: result?.grading || null,
     models: { ...(saved.models as object), grader: provider.models.grader },
     reasoning: { ...(saved.reasoning as object), grader: provider.reasoning?.grader },
+    taskStatus: result && Object.values(result.modelGrade).every(criterion => criterion.passed)
+      ? 'pass'
+      : graderError ? 'error' : 'fail',
     status: graderError || hasPipelineError
       ? 'error'
-      : Object.values(result!.modelGrade).every(criterion => criterion.passed)
+      : result!.modelGrade.answerAccuracy.passed && result!.modelGrade.factualSupport.passed
         ? 'pass'
         : 'fail',
     graderError,

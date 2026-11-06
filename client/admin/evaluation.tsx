@@ -5,7 +5,12 @@ import { formatCount } from './format.ts'
 import { Timeline } from './timeline.tsx'
 import { useLoad } from './use-load.ts'
 
-const CRITERIA: Record<string, string> = { factualSupport: 'Factual support', usefulAnswer: 'Useful answers', contextUse: 'Context use' }
+const CRITERIA: Record<string, string> = {
+  answerAccuracy: 'Answer accuracy',
+  factualSupport: 'Factual support',
+  usefulAnswer: 'Sales and task progress',
+  contextUse: 'Context use',
+}
 const CHECKS: Record<string, string> = { noDuplicateRequests: 'No duplicate requests', noPipelineErrors: 'No pipeline errors', requestOutcomesMatch: 'Expected request outcomes' }
 export function EvaluationView({ id }: { id: string }) {
   const { data, error, isLoading } = useLoad<EvaluationDetail>(`/admin/evaluations/${id}`)
@@ -58,6 +63,13 @@ export function EvaluationView({ id }: { id: string }) {
         </p>
       )}
       {data.mode === 'live' && <p className="admin-footnote">Model grades need human review. Inspect the cited turns before drawing conclusions.</p>}
+      {data.modelGrade?.answerAccuracy && (
+        <p className="admin-notice">
+          The primary result uses answer accuracy and factual support. Sales and task progress:
+          {data.taskStatus || 'not graded'}
+          . Context and demo checks are shown separately.
+        </p>
+      )}
       <div className="verdict-grid">
         {Object.entries(CRITERIA).map(([key, label]) => {
           const verdict = data.modelGrade?.[key]

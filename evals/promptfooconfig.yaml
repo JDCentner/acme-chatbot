@@ -26,20 +26,14 @@ evaluateOptions:
 defaultTest:
   assert:
     - type: javascript
+      metric: Answer accuracy
+      value: |
+        const meta = context.providerResponse.metadata;
+        const grade = meta.modelGrade?.answerAccuracy;
+        return {pass: meta.mode === 'live' && meta.status !== 'error' && grade?.passed === true, score: grade?.passed ? 1 : 0, reason: grade?.reasons?.join(' ') || 'Not scored: fixture mode or grader error.'};
+    - type: javascript
       metric: Factual support
       value: |
         const meta = context.providerResponse.metadata;
         const grade = meta.modelGrade?.factualSupport;
-        return {pass: meta.mode === 'live' && meta.status !== 'error' && grade?.passed === true, score: grade?.passed ? 1 : 0, reason: grade?.reasons?.join(' ') || 'Not scored: fixture mode or grader error.'};
-    - type: javascript
-      metric: Useful answer
-      value: |
-        const meta = context.providerResponse.metadata;
-        const grade = meta.modelGrade?.usefulAnswer;
-        return {pass: meta.mode === 'live' && meta.status !== 'error' && grade?.passed === true, score: grade?.passed ? 1 : 0, reason: grade?.reasons?.join(' ') || 'Not scored: fixture mode or grader error.'};
-    - type: javascript
-      metric: Context use
-      value: |
-        const meta = context.providerResponse.metadata;
-        const grade = meta.modelGrade?.contextUse;
         return {pass: meta.mode === 'live' && meta.status !== 'error' && grade?.passed === true, score: grade?.passed ? 1 : 0, reason: grade?.reasons?.join(' ') || 'Not scored: fixture mode or grader error.'};

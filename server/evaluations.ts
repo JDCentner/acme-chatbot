@@ -1,4 +1,4 @@
-import type { ModelProvider } from './contracts.ts'
+import type { gradeSchema, ModelProvider } from './contracts.ts'
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
@@ -62,7 +62,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
         && (expected.hour === undefined || slot?.hour === expected.hour)
     }))
     const codeChecks = { noDuplicateRequests: duplicateCount === 0, noPipelineErrors: !hasErrors, requestOutcomesMatch }
-    let modelGrade: unknown = null
+    let modelGrade: z.infer<typeof gradeSchema> | null = null
     let grading: unknown = null
     let graderError: string | null = null
     if (provider.mode === 'live') {
@@ -93,9 +93,15 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
       ? 'fixture_only'
       : graderError || hasErrors
         ? 'error'
-        : Object.values(modelGrade as Record<string, { passed: boolean }>).every(criterion => criterion.passed)
+        : modelGrade!.answerAccuracy.passed && modelGrade!.factualSupport.passed
           ? 'pass'
           : 'fail'
+    let taskStatus = status
+    if (modelGrade && status !== 'error') {
+      taskStatus = Object.values(modelGrade).every(criterion => criterion.passed)
+        ? 'pass'
+        : 'fail'
+    }
     return store.saveRun({
       input,
       transcript,
@@ -109,6 +115,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
         : 'fail',
       graderError,
       status,
+      taskStatus,
       mode: provider.mode,
       models: provider.models,
       reasoning: provider.reasoning,

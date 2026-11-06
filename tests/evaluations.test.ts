@@ -18,6 +18,11 @@ function gradingProvider(grade: ModelProvider['grade']): ModelProvider {
 }
 const passingGrade = {
   advisories: [],
+  answerAccuracy: {
+    passed: true,
+    reasons: ['Correct answer.'],
+    evidence: [],
+  },
   factualSupport: {
     passed: true,
     reasons: ['Test verdict.'],
@@ -72,6 +77,31 @@ test('demo request outcomes do not change the separate task grade', async () => 
     assert.equal(result.codeChecks.requestOutcomesMatch, false)
     assert.equal(result.codeStatus, 'fail')
     assert.equal(result.status, 'pass')
+  }
+  finally { store.close() }
+})
+
+test('a secondary sales miss does not change the primary confidence result', async () => {
+  const store = new Store(':memory:')
+  const provider = gradingProvider(async () => ({
+    ...passingGrade,
+    usefulAnswer: {
+      passed: false,
+      reasons: ['No tour offer after pricing.'],
+      evidence: [
+        { requirementId: 'price-next-step', turn: 1, quote: 'Assisted Living starts at $3,000 monthly.' },
+      ],
+    },
+  }))
+  provider.draft = async () => ({ text: 'Assisted Living starts at $3,000 monthly.', tools: [] })
+  try {
+    const result = await evaluate(store, provider, {
+      variant: 'single',
+      messages: ['What does Assisted Living cost?'],
+      expectations: 'Task facts apply.',
+    }) as { status: string, taskStatus: string }
+    assert.equal(result.status, 'pass')
+    assert.equal(result.taskStatus, 'fail')
   }
   finally { store.close() }
 })

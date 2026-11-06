@@ -32,6 +32,7 @@ const criterionSchema = z.object({
   reasons: z.array(z.string()).min(1).max(12),
 }).strict()
 export const gradeSchema = z.object({
+  answerAccuracy: criterionSchema,
   factualSupport: criterionSchema,
   usefulAnswer: criterionSchema,
   contextUse: criterionSchema,

@@ -50,6 +50,11 @@ test('regrading saves a linked result without replaying the conversation', async
       batchId: 'regraded',
       provider: grader(async () => ({
         advisories: [],
+        answerAccuracy: {
+          passed: true,
+          reasons: ['Correct answer.'],
+          evidence: [],
+        },
         factualSupport: {
           passed: true,
           reasons: ['Supported.'],

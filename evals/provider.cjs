@@ -40,6 +40,7 @@ class AcmeProvider {
         reasoning: run.reasoning,
         codeChecks: run.codeChecks,
         codeStatus: run.codeStatus,
+        taskStatus: run.taskStatus,
         graderVersion: run.grading?.version,
         taskSourceHash: run.grading?.taskSourceHash,
         status: run.status,

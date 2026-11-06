@@ -17,6 +17,11 @@ const snapshot: GradingSnapshot = {
 function passing() {
   return {
     advisories: [],
+    answerAccuracy: {
+      passed: true,
+      reasons: ['Correct answer.'],
+      evidence: [],
+    },
     factualSupport: {
       passed: true,
       reasons: ['Supported.'],

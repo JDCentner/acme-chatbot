@@ -47,6 +47,7 @@ export function adminRoutes(config: { store: Store, provider: ModelProvider, def
           : undefined,
         sourceRunId: run.sourceRunId,
         codeStatus: run.codeStatus,
+        taskStatus: run.taskStatus,
       }
     })
     response.json(summaries)

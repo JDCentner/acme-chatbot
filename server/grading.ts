@@ -3,7 +3,7 @@ import type { TaskAssessment } from './grading-rubric.ts'
 import type { Store } from './store.ts'
 import { createHash } from 'node:crypto'
 import { gradeSchema, GREETING } from './contracts.ts'
-import { GRADER_VERSION, TASK_DOCUMENT, TASK_GRADER_PROMPT, TASK_REQUIREMENTS, TASK_SOURCE_HASH, taskAssessmentSchema } from './grading-rubric.ts'
+import { GRADER_VERSION, TASK_CRITERIA, TASK_DOCUMENT, TASK_GRADER_PROMPT, TASK_REQUIREMENTS, TASK_SOURCE_HASH, taskAssessmentSchema } from './grading-rubric.ts'
 import { bounded } from './models.ts'
 
 const GRADER_TIMEOUT_MS = 90_000
@@ -23,7 +23,7 @@ function validateEvidence(assessment: TaskAssessment, transcript: GradingTurn[])
       evidence: [],
     }
   }
-  for (const criterion of ['factualSupport', 'usefulAnswer', 'contextUse'] as const) {
+  for (const criterion of TASK_CRITERIA) {
     const result = assessment[criterion]
     if (!result.passed && result.evidence.length === 0)
       throw new Error('A failed task criterion needs source and reply evidence.')
@@ -84,7 +84,7 @@ export async function gradeSnapshot(input: { store: Store, provider: ModelProvid
         key,
         useCache,
       })
-  const modelGrade = gradeSchema.parse(Object.fromEntries((['factualSupport', 'usefulAnswer', 'contextUse'] as const).map(criterion => [
+  const modelGrade = gradeSchema.parse(Object.fromEntries(TASK_CRITERIA.map(criterion => [
     criterion,
     {
       passed: assessment[criterion].passed,

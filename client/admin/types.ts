@@ -25,6 +25,7 @@ export interface Audit {
 export interface Turn { id: string, input: string, reply: string | null, decision: string | null, audit: string, created_at: string }
 export interface Conversation { id: string, created_at: string, turn_count: number, first_message?: string }
 export interface Evaluation {
+  taskStatus?: string
   caseId?: string
   category?: string
   batchId?: string

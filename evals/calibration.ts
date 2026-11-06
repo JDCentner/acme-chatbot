@@ -4,13 +4,18 @@ export interface CalibrationCase {
   id: string
   description: string
   transcript: GradingTurn[]
-  expected: Partial<Record<'factualSupport' | 'usefulAnswer' | 'contextUse', boolean>>
+  expected: Partial<Record<'answerAccuracy' | 'factualSupport' | 'usefulAnswer' | 'contextUse', boolean>>
   source: string
 }
 function exchange(user: string, assistant: string): GradingTurn {
   return { user, assistant, tools: [] }
 }
-const allPass = { factualSupport: true, usefulAnswer: true, contextUse: true }
+const allPass = {
+  answerAccuracy: true,
+  factualSupport: true,
+  usefulAnswer: true,
+  contextUse: true,
+}
 
 export const CALIBRATION_CASES: CalibrationCase[] = [
   {
