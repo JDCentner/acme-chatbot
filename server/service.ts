@@ -45,6 +45,7 @@ export class ConversationService {
     const audit: Record<string, unknown> = {
       mode: this.provider.mode,
       models: this.provider.models,
+      reasoning: this.provider.reasoning,
       promptVersion: PROMPT_VERSION,
       variant,
       tools,

@@ -88,6 +88,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
       status,
       mode: provider.mode,
       models: provider.models,
+      reasoning: provider.reasoning,
       durationMs: Math.round(performance.now() - started),
       requests,
     })
