@@ -169,6 +169,17 @@ export class Store {
     return this.database.prepare('SELECT * FROM requests ORDER BY rowid DESC').all() as unknown as SavedRequest[]
   }
 
+  requestState(conversationId: string) {
+    const slots = this.database.prepare('SELECT slot FROM checked_slots WHERE conversation_id=? ORDER BY slot').all(conversationId) as { slot: string }[]
+    return {
+      checkedSlots: slots.map(row => row.slot),
+      savedRequests: this.requests().filter(request => request.conversation_id === conversationId).map(request => ({
+        kind: request.kind,
+        details: JSON.parse(request.details) as RequestDetails,
+      })),
+    }
+  }
+
   conversations(): unknown[] {
     return this.database.prepare('SELECT c.*, COUNT(t.id) AS turn_count, (SELECT input FROM turns first_turn WHERE first_turn.conversation_id=c.id ORDER BY first_turn.rowid LIMIT 1) AS first_message FROM conversations c LEFT JOIN turns t ON t.conversation_id=c.id GROUP BY c.id ORDER BY c.rowid DESC').all()
   }

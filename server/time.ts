@@ -75,5 +75,12 @@ export function resolveAvailability(phrase: string, clock: () => Date): { date: 
 }
 
 export function isBookableSlot(slot: string, clock: () => Date): boolean {
-  return seedSlots(clock).includes(slot)
+  return seedSlots(clock).includes(canonicalSlot(slot))
+}
+
+export function canonicalSlot(slot: string): string {
+  const date = DateTime.fromISO(slot, { zone: TIME_ZONE, setZone: true }).setZone(TIME_ZONE)
+  if (!date.isValid)
+    throw new Error('Enter a valid tour time.')
+  return date.toISO()!
 }

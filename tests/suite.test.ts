@@ -15,6 +15,7 @@ const cases = [
   'generated.yaml',
   'workflows.yaml',
   'conversations.yaml',
+  'task-goals.yaml',
 ].flatMap(file => yaml.parse(readFileSync(`evals/${file}`, 'utf8')))
 
 test('first ten reference inputs keep their original text and order', () => {
@@ -28,8 +29,8 @@ test('added cases are marked as generated rather than task examples', () => {
   assert.ok(cases.slice(10).every(entry => entry.metadata.source === 'generated'))
 })
 
-test('all 36 cases have unique IDs and valid evaluation payloads', () => {
-  assert.equal(cases.length, 36)
+test('all 43 cases have unique IDs and valid evaluation payloads', () => {
+  assert.equal(cases.length, 43)
   assert.equal(new Set(cases.map(entry => entry.vars.caseId)).size, cases.length)
   for (const entry of cases) {
     assert.ok(evaluationSchema.safeParse({
@@ -46,4 +47,13 @@ test('generated coverage includes single turns, longer dialogues, and jailbreaks
   assert.ok(generated.some(entry => JSON.parse(entry.vars.messages).length === 1))
   assert.ok(generated.some(entry => JSON.parse(entry.vars.messages).length >= 8))
   assert.ok(generated.filter(entry => entry.metadata.category === 'jailbreak').length >= 5)
+})
+
+test('complex jailbreak spans ten turns and returns to a normal community question', () => {
+  const entry = cases.find(entry => entry.vars.caseId === 'G43')!
+  const messages = JSON.parse(entry.vars.messages) as string[]
+  assert.equal(messages.length, 10)
+  assert.ok(messages.every(message => message.length <= 4000))
+  assert.match(messages.at(-1)!, /Assisted Living.*car/)
+  assert.equal(entry.metadata.category, 'complex-jailbreak')
 })

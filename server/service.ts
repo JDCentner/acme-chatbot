@@ -60,6 +60,7 @@ export class ConversationService {
       ],
       tools,
       pending: this.store.pending(conversationId) || null,
+      requestState: this.store.requestState(conversationId),
     }
     let decision: string | null = null
     const finish = (reply: string, pendingId?: string) => {
@@ -83,6 +84,7 @@ export class ConversationService {
       const confirmed = pending && isConfirmation(input.message, pending.id)
       if (!confirmed)
         this.store.invalidatePending(conversationId)
+      context.pending = this.store.pending(conversationId) || null
       const actions = new Actions(this.store)
       const execute = (name: string, args: unknown) => {
         const result = actions.execute({
@@ -92,6 +94,8 @@ export class ConversationService {
           arguments: args,
         })
         tools.push(result)
+        context.pending = this.store.pending(conversationId) || null
+        context.requestState = this.store.requestState(conversationId)
         this.store.checkpoint(id, audit)
         return result
       }

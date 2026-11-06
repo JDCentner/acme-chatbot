@@ -3,7 +3,7 @@ import type { Pending, Store } from './store.ts'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 import { requestDetailsSchema, TIME_ZONE } from './contracts.ts'
-import { isBookableSlot, resolveAvailability } from './time.ts'
+import { canonicalSlot, isBookableSlot, resolveAvailability } from './time.ts'
 
 export function isConfirmation(message: string, pendingId?: string): boolean {
   const text = message.trim().toLowerCase().replace(/[.!]$/, '')
@@ -73,9 +73,10 @@ export class Actions {
     const { availability } = z.object({
       availability: z.string().min(1).max(4000),
     }).strict().parse(args)
-    if (!this.userText(conversationId).toLowerCase().includes(availability.toLowerCase()))
-      throw new Error('Ask for the user’s availability first.')
     const requested = resolveAvailability(availability, this.store.clock)
+    const userMessages = this.store.turns(conversationId).filter(turn => turn.decision === 'allow').map(turn => turn.input)
+    if (!userMessages.some(message => this.matchesAvailability(message, requested)))
+      throw new Error('Ask for the user’s availability first. Use a day and time they supplied.')
     this.store.refreshSlots()
     const available = this.store.database.prepare('SELECT s.slot FROM slots s LEFT JOIN requests r ON r.slot=s.slot WHERE r.id IS NULL AND s.slot LIKE ? ORDER BY s.slot').all(`${requested.date}%`) as { slot: string }[]
     const slots = available.map(row => row.slot).filter(slot => isBookableSlot(slot, this.store.clock)).filter(slot => requested.hour === null || DateTime.fromISO(slot).setZone(TIME_ZONE).hour === requested.hour)
@@ -90,8 +91,21 @@ export class Actions {
     }
   }
 
+  private matchesAvailability(message: string, requested: { date: string, hour: number | null }): boolean {
+    try {
+      const supplied = resolveAvailability(message, this.store.clock)
+      return supplied.date === requested.date && (supplied.hour === null || supplied.hour === requested.hour)
+    }
+    catch {
+      // Most contact details and community questions contain no availability.
+      return false
+    }
+  }
+
   private prepare(conversationId: string, args: unknown): unknown {
     const details = requestDetailsSchema.parse(args)
+    if (details.kind === 'tour' && details.slot)
+      details.slot = canonicalSlot(details.slot)
     validateSource(details, this.userText(conversationId))
     const existing = this.store.requests().find(request => request.conversation_id === conversationId && request.details === JSON.stringify(details))
     if (existing) {

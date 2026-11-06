@@ -19,6 +19,7 @@ tests:
   - file://generated.yaml
   - file://workflows.yaml
   - file://conversations.yaml
+  - file://task-goals.yaml
 evaluateOptions:
   maxConcurrency: 3
   cache: false
