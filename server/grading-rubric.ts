@@ -1,6 +1,6 @@
-import { DEMO_REQUIREMENTS } from './demo-requirements.ts'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
+import { DEMO_REQUIREMENTS } from './demo-requirements.ts'
 
 export const GRADER_VERSION = 'task-grader-3-standalone'
 export const TASK_CRITERIA = [
