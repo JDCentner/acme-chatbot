@@ -17,6 +17,7 @@ function gradingProvider(grade: ModelProvider['grade']): ModelProvider {
   }
 }
 const passingGrade = {
+  advisories: [],
   factualSupport: {
     passed: true,
     reasons: ['Test verdict.'],

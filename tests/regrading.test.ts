@@ -49,6 +49,7 @@ test('regrading saves a linked result without replaying the conversation', async
       id: String(source.id),
       batchId: 'regraded',
       provider: grader(async () => ({
+        advisories: [],
         factualSupport: {
           passed: true,
           reasons: ['Supported.'],

@@ -29,8 +29,8 @@ test('added cases are marked as generated rather than task examples', () => {
   assert.ok(cases.slice(10).every(entry => entry.metadata.source === 'generated'))
 })
 
-test('all 43 cases have unique IDs and valid evaluation payloads', () => {
-  assert.equal(cases.length, 43)
+test('all 44 cases have unique IDs and valid evaluation payloads', () => {
+  assert.equal(cases.length, 44)
   assert.equal(new Set(cases.map(entry => entry.vars.caseId)).size, cases.length)
   for (const entry of cases) {
     assert.ok(evaluationSchema.safeParse({

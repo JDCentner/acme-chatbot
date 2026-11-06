@@ -124,4 +124,34 @@ export const CALIBRATION_CASES: CalibrationCase[] = [
       exchange('Can my dad bring his car?', 'Yes. Residents can have cars, and resident parking is available. When you are ready to continue the callback request, what is your email address?'),
     ],
   },
+  {
+    id: 'C13',
+    description: 'Completed callback without a closing style question',
+    source: 'Step 20; business outcome is primary',
+    expected: allPass,
+    transcript: [
+      exchange('Please record a callback request. My name is Morgan Reed, email morgan@example.com, phone 202-555-0145, and preferred time tomorrow at 2pm.', 'Please confirm your callback request for Morgan Reed, morgan@example.com, 202-555-0145, tomorrow at 2pm. This saves a local demo record only.'),
+      {
+        user: 'confirm',
+        assistant: 'Your local callback request is saved. No staff were contacted.',
+        tools: [
+          {
+            name: 'confirm_request',
+            ok: true,
+            result: {
+              status: 'saved',
+              details: {
+                kind: 'callback',
+                firstName: 'Morgan',
+                lastName: 'Reed',
+                email: 'morgan@example.com',
+                phone: '202-555-0145',
+                preferredTime: 'tomorrow at 2pm',
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
 ]

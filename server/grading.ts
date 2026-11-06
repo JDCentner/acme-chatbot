@@ -23,12 +23,15 @@ function validateEvidence(assessment: TaskAssessment, transcript: GradingTurn[])
       evidence: [],
     }
   }
-  for (const [criterion, result] of Object.entries(assessment)) {
+  for (const criterion of ['factualSupport', 'usefulAnswer', 'contextUse'] as const) {
+    const result = assessment[criterion]
     if (!result.passed && result.evidence.length === 0)
       throw new Error('A failed task criterion needs source and reply evidence.')
     for (const evidence of result.evidence)
       validateCitation({ criterion, evidence, transcript })
   }
+  for (const evidence of assessment.advisories)
+    validateCitation({ criterion: 'usefulAnswer', evidence, transcript })
   return assessment
 }
 
@@ -81,11 +84,11 @@ export async function gradeSnapshot(input: { store: Store, provider: ModelProvid
         key,
         useCache,
       })
-  const modelGrade = gradeSchema.parse(Object.fromEntries(Object.entries(assessment).map(([criterion, result]) => [
+  const modelGrade = gradeSchema.parse(Object.fromEntries((['factualSupport', 'usefulAnswer', 'contextUse'] as const).map(criterion => [
     criterion,
     {
-      passed: result.passed,
-      reasons: result.reasons.map(reason => `${result.evidence.map(item => `${item.requirementId}, turn ${item.turn}`).join('; ')}${result.evidence.length ? ': ' : ''}${reason}`),
+      passed: assessment[criterion].passed,
+      reasons: assessment[criterion].reasons.map(reason => `${assessment[criterion].evidence.map(item => `${item.requirementId}, turn ${item.turn}`).join('; ')}${assessment[criterion].evidence.length ? ': ' : ''}${reason}`),
     },
   ])))
   return {
@@ -96,6 +99,7 @@ export async function gradeSnapshot(input: { store: Store, provider: ModelProvid
       inputHash: key,
       cacheHit: Boolean(cached),
       assessment,
+      advisories: assessment.advisories,
       evidence,
     },
   }

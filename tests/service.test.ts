@@ -124,6 +124,31 @@ test('same requestId with changed text fails', async () => {
   store.close()
 })
 
+test('a contextual confirmation reaches the agent when contact details are still missing', async () => {
+  let classifications = 0
+  let drafts = 0
+  const { send, store, conversation } = setup(override({
+    classify: async () => {
+      classifications++
+      return { decision: 'allow', reason: 'A callback request.' }
+    },
+    draft: async () => {
+      drafts++
+      return { text: 'What is your phone number?', tools: [] }
+    },
+  }))
+  try {
+    await send('Please arrange a callback. My name is Morgan Reed.')
+    const reply = await send('confirm')
+    assert.equal(classifications, 1)
+    assert.equal(drafts, 2)
+    assert.match(reply.reply, /phone number/)
+    assert.equal(JSON.parse(store.turns(conversation.id)[1].audit).classificationSource, 'code')
+    assert.equal(store.requests().length, 0)
+  }
+  finally { store.close() }
+})
+
 test('input classification receives conversation context without community facts', async () => {
   let input: unknown
   const { send, store } = setup(override({

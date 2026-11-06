@@ -3,12 +3,17 @@ import { z } from 'zod'
 export const MAX_MESSAGE_LENGTH = 4_000
 export const MAX_MODEL_TEXT_LENGTH = 8_000
 export const TIME_ZONE = 'America/New_York'
-export const PROMPT_VERSION = 'acme-2.0'
+export const PROMPT_VERSION = 'acme-2.1'
 export const BLOCK_REPLY = 'I can help with questions about ACME Senior Living, tours, or contacting our team.'
 export const CLARIFY_REPLY = 'Could you tell me how I can help with ACME Senior Living?'
 export const RETRY_REPLY = 'I could not check your message. Please try again.'
 export const FALLBACK_REPLY = 'I could not verify a reply. Please try again or call 850-445-8362. Any request already saved is still saved.'
 export const GREETING = 'Hi, this is ACME Senior Living. My name is Sophie. I am an AI assistant. This chat is stored for quality review. I can answer questions and save demo requests. No staff are contacted and no material is sent. How may I help you today?'
+export const DEMO_CAPABILITIES = {
+  requestKinds: ['tour', 'callback', 'brochure'],
+  humanContact: 'Offer the community phone or collect a callback request for an unresolved question. No staff are contacted.',
+  isMockOnly: true,
+} as const
 
 export const messageSchema = z.object({
   message: z.string().trim().min(1, 'Enter a message.').max(MAX_MESSAGE_LENGTH),
@@ -73,6 +78,7 @@ export interface ModelContext {
   tools: ToolResult[]
   pending: unknown
   requestState?: { checkedSlots: string[], savedRequests: Array<{ kind: string, details: RequestDetails }> }
+  capabilities?: { requestKinds: readonly string[], humanContact: string, isMockOnly: boolean }
 }
 export interface ModelProvider {
   mode: 'fake' | 'live'
@@ -81,5 +87,6 @@ export interface ModelProvider {
   classify: (context: Pick<ModelContext, 'messages'>) => Promise<unknown>
   draft: (context: ModelContext) => Promise<unknown>
   review: (context: ModelContext, draft: string) => Promise<unknown>
+  repair?: (input: { context: ModelContext, draft: string, reasons: string[] }) => Promise<string>
   grade: (input: unknown) => Promise<unknown>
 }

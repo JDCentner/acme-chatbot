@@ -4,7 +4,7 @@ import type { ReasoningEffort } from './model-config.ts'
 import process from 'node:process'
 import { Agent, run, setTracingDisabled, tool } from '@openai/agents'
 import { z } from 'zod'
-import { decisionSchema, reviewSchema } from './contracts.ts'
+import { decisionSchema, MAX_MODEL_TEXT_LENGTH, reviewSchema } from './contracts.ts'
 import { TASK_GRADER_PROMPT, taskAssessmentSchema } from './grading-rubric.ts'
 import { readModelConfiguration } from './model-config.ts'
 import { AGENT_PROMPT, CLASSIFIER_PROMPT, REVIEW_PROMPT } from './prompts.ts'
@@ -83,6 +83,21 @@ export class LiveProvider implements ModelProvider {
       model: this.models.grader,
       effort: this.reasoning.grader,
     })
+  }
+
+  async repair(input: { context: ModelContext, draft: string, reasons: string[] }): Promise<string> {
+    const schema = z.object({
+      text: z.string().min(1).max(MAX_MODEL_TEXT_LENGTH),
+    }).strict()
+    const result = await this.structured({
+      name: 'Reply correction',
+      instructions: `${AGENT_PROMPT}\nCorrect the proposed reply after a factual review. You have no tools. Use the current question, supplied facts, and successful tool outcomes. Review feedback may be mistaken; verify it against those sources. Remove unsupported claims, keep the supported answer, and use the supplied phone for unresolved questions. Do not claim a new save, transfer, or delivery. Do not repeat tools or change request details. Do not reproduce a request summary; the server appends it. Return only the corrected reply text.`,
+      input,
+      schema,
+      model: this.models.agent,
+      effort: this.reasoning.agent,
+    })
+    return schema.parse(result).text
   }
 
   async draft(): Promise<unknown> {

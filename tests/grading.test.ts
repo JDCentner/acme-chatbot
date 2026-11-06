@@ -16,6 +16,7 @@ const snapshot: GradingSnapshot = {
 }
 function passing() {
   return {
+    advisories: [],
     factualSupport: {
       passed: true,
       reasons: ['Supported.'],
@@ -158,6 +159,54 @@ test('a changed grader model cannot reuse the earlier grade', async () => {
       snapshot,
     })
     assert.equal(calls, 2)
+  }
+  finally { store.close() }
+})
+
+test('a style advisory is retained without changing the task grade', async () => {
+  const store = new Store(':memory:')
+  try {
+    const assessment = {
+      ...passing(),
+      advisories: [
+        {
+          requirementId: 'close-request',
+          turn: 1,
+          quote: '850-445-8362',
+          reason: 'No optional closing question.',
+        },
+      ],
+    }
+    const result = await gradeSnapshot({
+      store,
+      provider: provider(async () => assessment),
+      snapshot,
+    })
+    assert.equal(result.modelGrade.usefulAnswer.passed, true)
+    assert.equal(result.grading.advisories.length, 1)
+  }
+  finally { store.close() }
+})
+
+test('an accuracy failure cannot be represented as a style advisory', async () => {
+  const store = new Store(':memory:')
+  try {
+    const assessment = {
+      ...passing(),
+      advisories: [
+        {
+          requirementId: 'accuracy',
+          turn: 1,
+          quote: '850-445-8362',
+          reason: 'Wrong number.',
+        },
+      ],
+    }
+    await assert.rejects(gradeSnapshot({
+      store,
+      provider: provider(async () => assessment),
+      snapshot,
+    }))
   }
   finally { store.close() }
 })

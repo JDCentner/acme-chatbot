@@ -3,7 +3,7 @@ import type { Variant } from './models.ts'
 import type { Store } from './store.ts'
 import { z } from 'zod'
 import { Actions, isConfirmation } from './actions.ts'
-import { BLOCK_REPLY, CLARIFY_REPLY, decisionSchema, draftSchema, FALLBACK_REPLY, messageSchema, PROMPT_VERSION, RETRY_REPLY, reviewSchema } from './contracts.ts'
+import { BLOCK_REPLY, CLARIFY_REPLY, decisionSchema, DEMO_CAPABILITIES, draftSchema, FALLBACK_REPLY, MAX_MODEL_TEXT_LENGTH, messageSchema, PROMPT_VERSION, RETRY_REPLY, reviewSchema } from './contracts.ts'
 import { bounded, LiveProvider } from './models.ts'
 
 export class HttpError extends Error {
@@ -61,6 +61,7 @@ export class ConversationService {
       tools,
       pending: this.store.pending(conversationId) || null,
       requestState: this.store.requestState(conversationId),
+      capabilities: DEMO_CAPABILITIES,
     }
     let decision: string | null = null
     const finish = (reply: string, pendingId?: string) => {
@@ -70,7 +71,12 @@ export class ConversationService {
     }
     try {
       if (variant !== 'baseline') {
-        const classification = decisionSchema.parse(await bounded(this.provider.classify({ messages: context.messages })))
+        const hasPreviousUserTurn = context.messages.slice(0, -1).some(message => message.role === 'user')
+        const isContextualConfirmation = hasPreviousUserTurn && isConfirmation(input.message, this.store.pending(conversationId)?.id)
+        const classification = isContextualConfirmation
+          ? { decision: 'allow', reason: 'A short confirmation refers to the preceding community conversation. Action rules still validate the request.' }
+          : decisionSchema.parse(await bounded(this.provider.classify({ messages: context.messages })))
+        audit.classificationSource = isContextualConfirmation ? 'code' : 'model'
         audit.classification = classification
         decision = classification.decision
         if (decision === 'block')
@@ -118,10 +124,15 @@ export class ConversationService {
       if (!draft)
         throw new Error('The agent returned no reply.')
       if (variant !== 'baseline') {
-        const review = reviewSchema.parse(await bounded(this.provider.review(context, draft)))
-        audit.review = review
-        if (!review.approved)
+        const checked = await this.checkReply({
+          context,
+          draft,
+          audit,
+          summary: prepared?.summary,
+        })
+        if (checked === null)
           return finish(FALLBACK_REPLY)
+        draft = checked
       }
       if (prepared)
         this.store.presentPending(prepared.id)
@@ -135,6 +146,24 @@ export class ConversationService {
         ? RETRY_REPLY
         : FALLBACK_REPLY)
     }
+  }
+
+  private async checkReply(input: { context: ModelContext, draft: string, audit: Record<string, unknown>, summary?: string }): Promise<string | null> {
+    const { context, draft, audit, summary } = input
+    const review = reviewSchema.parse(await bounded(this.provider.review(context, draft)))
+    audit.review = review
+    if (review.approved)
+      return draft
+    if (!this.provider.repair)
+      return null
+    const corrected = z.string().trim().min(1).max(MAX_MODEL_TEXT_LENGTH).parse(await bounded(this.provider.repair({ context, draft, reasons: review.reasons })))
+    const repairedDraft = summary
+      ? `${corrected}\n\n${summary}`
+      : corrected
+    audit.repairDraft = repairedDraft
+    const repairReview = reviewSchema.parse(await bounded(this.provider.review(context, repairedDraft)))
+    audit.repairReview = repairReview
+    return repairReview.approved ? repairedDraft : null
   }
 
   private async fixtureDraft(context: ModelContext, execute: (name: string, args: unknown) => unknown): Promise<string> {

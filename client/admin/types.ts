@@ -12,8 +12,11 @@ export interface Audit {
   models?: Settings['models']
   reasoning?: Settings['reasoning']
   classification?: { decision: string, reason: string }
+  classificationSource?: 'code' | 'model'
   review?: Verdict
   draft?: string
+  repairDraft?: string
+  repairReview?: Verdict
   durationMs?: number
   error?: string
   promptVersion?: string
@@ -38,7 +41,7 @@ export interface Evaluation {
   codeChecks: Record<string, boolean>
 }
 export interface EvaluationDetail extends Evaluation {
-  grading?: { version: string }
+  grading?: { version: string, advisories?: Array<{ requirementId: string, turn: number, quote: string, reason: string }> }
   input: { variant: Variant, messages: string[], expectations: string }
   expectations: string
   graderError?: string

@@ -14,8 +14,10 @@ export function Timeline({ turns }: { turns: Array<{ id: string, user: string, a
             </strong>
             <div>
               {turn.audit.classification && <Badge value={turn.audit.classification.decision} />}
-              <Badge value={turn.audit.review
-                ? turn.audit.review.approved ? 'approved' : 'rejected'
+              <Badge value={(turn.audit.repairReview || turn.audit.review)
+                ? (turn.audit.repairReview || turn.audit.review)!.approved
+                    ? 'approved'
+                    : 'rejected'
                 : 'not reviewed'}
               />
               {turn.audit.durationMs !== undefined && (
@@ -40,6 +42,7 @@ export function Timeline({ turns }: { turns: Array<{ id: string, user: string, a
             {turn.audit.classification && (
               <section>
                 <h4>Input decision</h4>
+                {turn.audit.classificationSource === 'code' && <p>Code recognized a short reply in this conversation. Request validation still applies.</p>}
                 <p>{turn.audit.classification.reason}</p>
               </section>
             )}
@@ -53,6 +56,13 @@ export function Timeline({ turns }: { turns: Array<{ id: string, user: string, a
               <section>
                 <h4>Proposed draft · may differ from displayed reply</h4>
                 <p className="draft-text">{turn.audit.draft}</p>
+              </section>
+            )}
+            {turn.audit.repairDraft && (
+              <section>
+                <h4>Corrected draft · no tools</h4>
+                <p className="draft-text">{turn.audit.repairDraft}</p>
+                <ul>{turn.audit.repairReview?.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
               </section>
             )}
             {turn.audit.tools?.map(tool => (

@@ -1,6 +1,6 @@
 const process = require('node:process')
 
-const SUITE_VERSION = 'acme-suite-3'
+const SUITE_VERSION = 'acme-suite-4'
 class AcmeProvider {
   constructor(options) { this.config = options.config }
   id() { return `acme:${this.config.variant}` }
@@ -50,6 +50,9 @@ class AcmeProvider {
           assistant: turn.assistant,
           decision: turn.audit.classification,
           review: turn.audit.review,
+          repairDraft: turn.audit.repairDraft,
+          repairReview: turn.audit.repairReview,
+          classificationSource: turn.audit.classificationSource,
           tools: turn.audit.tools,
           rejectedDraft: turn.audit.review?.approved === false
             ? turn.audit.draft

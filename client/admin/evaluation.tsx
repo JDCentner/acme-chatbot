@@ -77,6 +77,24 @@ export function EvaluationView({ id }: { id: string }) {
           )
         })}
       </div>
+      {Boolean(data.grading?.advisories?.length) && (
+        <section className="expectations">
+          <h3>Advisory style notes</h3>
+          <ul>
+            {data.grading!.advisories!.map(note => (
+              <li key={`${note.requirementId}-${note.turn}-${note.quote}`}>
+                {note.requirementId}
+                , turn
+                {' '}
+                {note.turn}
+                :
+                {' '}
+                {note.reason}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <section className="code-checks">
         <h3>Demo code checks</h3>
         {Object.entries(data.codeChecks).map(([key, passed]) => (
