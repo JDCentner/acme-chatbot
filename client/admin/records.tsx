@@ -29,7 +29,9 @@ function listItems(kind: RecordKind, data: Data): ListItem[] {
     return (data as Evaluation[]).map(record => ({
       id: record.id,
       title: record.title,
-      subtitle: `${DESIGNS[record.variant].name} · ${formatCount(record.turnCount, 'turn')} · ${record.models?.agent || 'Fixture'}`,
+      subtitle: `${record.category
+        ? `${record.category} · `
+        : ''}${DESIGNS[record.variant].name} · ${formatCount(record.turnCount, 'turn')} · ${record.models?.agent || 'Fixture'}`,
       date: record.createdAt,
       status: record.status,
     }))
@@ -93,7 +95,7 @@ export function RecordsView({ kind }: { kind: RecordKind }) {
         <span>
           {formatCount(visible.length, 'record')}
           {kind === 'evaluations'
-            ? ' · latest 100'
+            ? ' · latest 300'
             : ''}
         </span>
       </div>

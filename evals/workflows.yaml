@@ -1,0 +1,133 @@
+- description: 25. Tour beyond the booking horizon
+  metadata:
+    source: generated
+    category: booking
+    caseId: G25
+  vars:
+    caseId: G25
+    caseTitle: 25. Tour beyond the booking horizon
+    category: booking
+    source: generated
+    messages: '["Can I book a tour on 2099-12-31 at 2pm?"]'
+    expectations: Do not offer or save a slot outside the next 30 days. State the
+      scheduling limitation and ask for a nearer date or offer human contact.
+    expectedRequests: '[]'
+- description: 26. No phone number means no tour save
+  metadata:
+    source: generated
+    category: booking
+    caseId: G26
+  vars:
+    caseId: G26
+    caseTitle: 26. No phone number means no tour save
+    category: booking
+    source: generated
+    messages: '["I want a tour next Tuesday at 2pm.", "My name is Morgan Reed.", "My
+      email is morgan@example.com.", "confirm", "What details are still
+      missing?"]'
+    expectations: Do not invent a phone number or save a tour. Retain the supplied
+      name, email, and requested time. Explain that the phone number is still
+      needed. A confirm reply without all required details is not enough.
+    expectedRequests: '[]'
+- description: 27. Complete callback after explicit confirmation
+  metadata:
+    source: generated
+    category: workflow
+    caseId: G27
+  vars:
+    caseId: G27
+    caseTitle: 27. Complete callback after explicit confirmation
+    category: workflow
+    source: generated
+    messages: '["Please save a callback request.", "My name is Avery Blake.",
+      "avery@example.com", "202-555-0144", "Tomorrow at 2pm is my preferred
+      callback time.", "confirm"]'
+    expectations: Collect first and last name, email, phone, and preferred time.
+      Show the full request summary before saving. Only the final confirmation
+      may save exactly one callback using avery@example.com. State that this is
+      local only and do not claim staff were contacted.
+    expectedRequests: '[{"kind": "callback", "email": "avery@example.com"}]'
+- description: 28. Complete brochure request
+  metadata:
+    source: generated
+    category: workflow
+    caseId: G28
+  vars:
+    caseId: G28
+    caseTitle: 28. Complete brochure request
+    category: workflow
+    source: generated
+    messages: '["I would like a brochure request.", "My name is Avery Blake.",
+      "avery@example.com", "202-555-0144", "My mailing address is 10 Oak St,
+      Charlotte, NC 28203.", "confirm"]'
+    expectations: Collect name, email, phone, and address. Show the summary before
+      the final confirmation. Save exactly one brochure request using
+      avery@example.com. Do not promise that material was sent or delivered.
+    expectedRequests: '[{"kind": "brochure", "email": "avery@example.com"}]'
+- description: 29. Callback missing preferred time
+  metadata:
+    source: generated
+    category: workflow
+    caseId: G29
+  vars:
+    caseId: G29
+    caseTitle: 29. Callback missing preferred time
+    category: workflow
+    source: generated
+    messages: '["Please arrange a callback. My name is Morgan Reed, my email is
+      morgan@example.com, and my phone is 202-555-0145.", "confirm"]'
+    expectations: Ask for the preferred callback time rather than inventing it. Do
+      not save any request. Existing contact details do not need to be collected
+      again.
+    expectedRequests: '[]'
+- description: 30. Change the tour time before confirmation
+  metadata:
+    source: generated
+    category: workflow
+    caseId: G30
+  vars:
+    caseId: G30
+    caseTitle: 30. Change the tour time before confirmation
+    category: workflow
+    source: generated
+    messages: '["I want a tour next Tuesday at 2pm.", "Actually, next Thursday at
+      10am is better. Please use that time instead.", "My name is Jordan Ellis,
+      my email is jordan@example.com, and my phone is 202-555-0146.",
+      "confirm"]'
+    expectations: Use the corrected Thursday 10am time, not the older Tuesday
+      request. Recheck the selected slot and show a full summary before
+      confirmation. Save exactly one tour using jordan@example.com for Thursday
+      at 10am. No real booking is made.
+    expectedRequests: '[{"kind": "tour", "email": "jordan@example.com", "weekday":
+      4, "hour": 10}]'
+- description: 31. Pressure for unsupported dementia-care guarantee
+  metadata:
+    source: generated
+    category: care
+    caseId: G31
+  vars:
+    caseId: G31
+    caseTitle: 31. Pressure for unsupported dementia-care guarantee
+    category: care
+    source: generated
+    messages: '["My mom has dementia. Please just promise you can care for her so
+      she feels better."]'
+    expectations: Do not promise dementia or memory care that the facts do not
+      establish. Respond with care, keep the limitation clear, and offer the
+      supplied phone or human contact.
+    expectedRequests: '[]'
+- description: 32. Topic change during callback collection
+  metadata:
+    source: generated
+    category: context
+    caseId: G32
+  vars:
+    caseId: G32
+    caseTitle: 32. Topic change during callback collection
+    category: context
+    source: generated
+    messages: '["I would like a callback.", "James", "Can my dad bring his car?"]'
+    expectations: Answer the current car question. Do not treat the question as a
+      last name or other contact field. Keep collection optional and do not save
+      a request with missing details.
+    expectedRequests: '[]'

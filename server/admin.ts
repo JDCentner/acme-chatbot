@@ -25,12 +25,15 @@ export function adminRoutes(config: { store: Store, provider: ModelProvider, def
   })
   router.get('/evaluations', (_request, response) => {
     const summaries = (store.runs() as Array<Record<string, unknown>>).map((run) => {
-      const input = run.input as { variant: string, messages: string[] }
+      const input = run.input as { variant: string, messages: string[], caseId?: string, caseTitle?: string, category?: string, batchId?: string }
       return {
         id: run.id,
         createdAt: run.createdAt,
         variant: input.variant,
-        title: input.messages[0],
+        title: input.caseTitle || input.messages[0],
+        caseId: input.caseId,
+        category: input.category,
+        batchId: input.batchId,
         turnCount: input.messages.length,
         status: run.status,
         mode: run.mode,

@@ -1,5 +1,6 @@
 import type { ModelProvider } from './contracts.ts'
 import { randomUUID } from 'node:crypto'
+import { DateTime } from 'luxon'
 import { z } from 'zod'
 import { gradeSchema } from './contracts.ts'
 import { bounded, variantSchema } from './models.ts'
@@ -8,11 +9,19 @@ import { Store } from './store.ts'
 
 export const evaluationSchema = z.object({
   variant: variantSchema,
+  caseId: z.string().max(80).optional(),
+  caseTitle: z.string().max(200).optional(),
+  category: z.string().max(80).optional(),
+  source: z.enum(['task', 'generated']).optional(),
+  suiteVersion: z.string().max(80).optional(),
+  batchId: z.string().max(100).optional(),
   messages: z.array(z.string().min(1).max(4000)).min(1).max(20),
   expectations: z.string().min(1).max(3000),
   expectedRequests: z.array(z.object({
     kind: z.enum(['tour', 'callback', 'brochure']),
     email: z.email().optional(),
+    weekday: z.number().int().min(1).max(5).optional(),
+    hour: z.number().int().min(9).max(17).optional(),
   }).strict()).max(3).optional(),
 }).strict()
 
@@ -44,7 +53,13 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
     const requestOutcomesMatch = input.expectedRequests === undefined || (requests.length === input.expectedRequests.length && input.expectedRequests.every((expected, index) => {
       const actual = requests[index]
       const details = JSON.parse(actual.details)
-      return actual.kind === expected.kind && (expected.email === undefined || details.email === expected.email)
+      const slot = details.slot
+        ? DateTime.fromISO(details.slot).setZone('America/New_York')
+        : null
+      return actual.kind === expected.kind
+        && (expected.email === undefined || details.email === expected.email)
+        && (expected.weekday === undefined || slot?.weekday === expected.weekday)
+        && (expected.hour === undefined || slot?.hour === expected.hour)
     }))
     const codeChecks = { noDuplicateRequests: duplicateCount === 0, noPipelineErrors: !hasErrors, requestOutcomesMatch }
     let modelGrade: unknown = null
@@ -58,6 +73,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
             assistant: turn.assistant,
             tools: turn.audit.tools || [],
           })),
+          now: sandbox.clock().toISOString(),
           facts: sandbox.facts(),
           expectations: input.expectations,
           requests,

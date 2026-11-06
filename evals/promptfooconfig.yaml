@@ -16,9 +16,11 @@ providers:
       variant: specialists
 tests:
   - file://cases.yaml
+  - file://generated.yaml
+  - file://workflows.yaml
   - file://conversations.yaml
 evaluateOptions:
-  maxConcurrency: 1
+  maxConcurrency: 3
   cache: false
 defaultTest:
   assert:

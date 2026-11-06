@@ -195,7 +195,7 @@ export class Store {
   }
 
   runs(): unknown[] {
-    return this.database.prepare('SELECT content FROM evaluation_runs ORDER BY rowid DESC LIMIT 100').all().map(row => JSON.parse(String(row.content)))
+    return this.database.prepare('SELECT content FROM evaluation_runs ORDER BY rowid DESC LIMIT 300').all().map(row => JSON.parse(String(row.content)))
   }
 
   activeVariant(fallback: Variant): Variant {

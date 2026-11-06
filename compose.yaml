@@ -33,6 +33,7 @@ services:
     entrypoint: [pnpm, exec, promptfoo, eval, -c, evals/promptfooconfig.yaml, --no-cache]
     environment:
       APP_URL: http://app:3000
+      EVAL_BATCH_ID: ${EVAL_BATCH_ID:-}
       PROMPTFOO_CONFIG_DIR: /app/eval-data
       PROMPTFOO_DISABLE_TELEMETRY: '1'
     volumes: ['eval-data:/app/eval-data']
