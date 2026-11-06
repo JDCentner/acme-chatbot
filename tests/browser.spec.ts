@@ -3,17 +3,17 @@ import { expect, test } from '@playwright/test'
 test('desktop chat supports keyboard use and error recovery', async ({ page }) => {
   await page.goto('http://localhost:3000')
   await expect(page.getByRole('heading', { name: 'Room to live. Support to thrive.' })).toBeVisible()
-  await page.getByRole('button', { name: 'Talk with Sophie' }).click()
+  await page.getByRole('button', { name: 'Ask a question' }).click()
   const input = page.getByRole('textbox', { name: 'Your message' })
   await expect(input).toBeFocused()
   await input.fill('Can my dad bring his car?')
   await input.press('Enter')
   await expect(page.getByText('Residents can bring cars. Resident parking is available.')).toBeVisible()
-  await page.route('**/messages?*', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"Please retry."}' }))
+  await page.route('**/messages', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"Please retry."}' }))
   await input.fill('I want a tour.')
   await input.press('Enter')
   await expect(page.getByRole('alert')).toContainText('Please retry.')
-  await page.unroute('**/messages?*')
+  await page.unroute('**/messages')
   await page.getByRole('button', { name: 'Retry message' }).click()
   await expect(page.getByText('What day and time would work for your tour?')).toBeVisible()
   await page.screenshot({ path: '/tmp/acme-desktop.png', fullPage: true })
@@ -21,7 +21,7 @@ test('desktop chat supports keyboard use and error recovery', async ({ page }) =
   await expect(page.getByRole('dialog')).not.toBeVisible()
 })
 
-test('mobile chat fits the viewport and opens evidence', async ({ page }) => {
+test('mobile chat fits the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('http://localhost:3000')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
@@ -31,7 +31,20 @@ test('mobile chat fits the viewport and opens evidence', async ({ page }) => {
   expect(bounds!.width).toBeLessThanOrEqual(390)
   await page.screenshot({ path: '/tmp/acme-mobile.png', fullPage: true })
   await page.getByRole('button', { name: 'Close chat' }).click()
-  await page.getByRole('button', { name: 'Demo results' }).click()
+})
+
+test('public site has no experiment controls or review links', async ({ page }) => {
+  await page.goto('http://localhost:3000')
+  await expect(page.getByText(/fixture mode|live model|demo results|agent design/i)).toHaveCount(0)
+  await expect(page.locator('a[href*="15500"], a[href*="review"]')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Ask a question' }).click()
+  await expect(page.getByRole('combobox')).toHaveCount(0)
+  await expect(page.getByRole('log')).toBeVisible()
+})
+
+test('internal review page remains available separately', async ({ page }) => {
+  await page.goto('http://localhost:3000/review.html')
+  await expect(page.getByRole('heading', { name: 'Conversation evidence' })).toBeVisible()
   await page.getByRole('button', { name: 'Conversations', exact: true }).click()
   await expect(page.locator('.inspector pre')).toBeVisible()
 })

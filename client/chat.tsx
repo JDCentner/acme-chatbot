@@ -10,11 +10,18 @@ export function Chat({ isOpen, onClose }: ChatProps) {
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const [isBusy, setIsBusy] = useState(false)
-  const [variant, setVariant] = useState('single')
   const [pendingId, setPendingId] = useState<string>()
   const retryRef = useRef<{ message: string, requestId: string } | undefined>(undefined)
   const logRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const returnFocusRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (isOpen) {
+      returnFocusRef.current = document.activeElement as HTMLElement
+      return
+    }
+    returnFocusRef.current?.focus()
+  }, [isOpen])
   useEffect(() => {
     logRef.current?.scrollTo(0, logRef.current.scrollHeight)
   }, [messages, isBusy])
@@ -58,7 +65,7 @@ export function Chat({ isOpen, onClose }: ChatProps) {
         ])
       }
       retryRef.current = submission
-      const reply = await api<Reply>(`/conversations/${id}/messages?variant=${variant}`, submission)
+      const reply = await api<Reply>(`/conversations/${id}/messages`, submission)
       setMessages(previous => [
         ...previous,
         {
@@ -74,7 +81,7 @@ export function Chat({ isOpen, onClose }: ChatProps) {
     catch (error) {
       setError(error instanceof Error
         ? error.message
-        : 'Could not send. Please retryRef.')
+        : 'Could not send. Please try again.')
     }
     finally {
       setIsBusy(false)
@@ -102,15 +109,7 @@ export function Chat({ isOpen, onClose }: ChatProps) {
         </div>
         <button aria-label="Close chat" onClick={onClose}>×</button>
       </header>
-      <div className="chat-controls">
-        <label>
-          Agent design
-          <select value={variant} disabled={Boolean(conversationId)} onChange={event => setVariant(event.target.value)}>
-            <option value="single">One agent + checks</option>
-            <option value="specialists">Sophie + specialists</option>
-            <option value="baseline">Original prompt</option>
-          </select>
-        </label>
+      <div className="chat-tools">
         <button
           className="quiet"
           disabled={isBusy}
@@ -125,12 +124,12 @@ export function Chat({ isOpen, onClose }: ChatProps) {
           New chat
         </button>
       </div>
-      <div className="chat-logRef" ref={logRef} role="logRef" aria-live="polite" aria-relevant="additions text">
+      <div className="chat-log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions text">
         {!messages.length && (
           <div className="welcome">
             <p className="eyebrow">START HERE</p>
             <h3>What would you like to know?</h3>
-            <p>Sophie is an AI assistant. Chats are stored locally for review. Demo requests do not contact staff or send material.</p>
+            <p>Sophie is an AI assistant. Chats are stored for quality review. Demo requests do not contact staff or send material.</p>
             <button className="suggestion" onClick={() => send('How much does the community cost?')}>What does it cost?</button>
             <button className="suggestion" onClick={() => send('I would like a tour.')}>Plan a tour</button>
           </div>
@@ -145,7 +144,7 @@ export function Chat({ isOpen, onClose }: ChatProps) {
             <p>{message.text}</p>
           </div>
         ))}
-        {isBusy && <p className="checking" role="status">Sophie is preparing and checking a reply…</p>}
+        {isBusy && <p className="checking" role="status">Sophie is replying…</p>}
       </div>
       {pendingId && <button className="confirm" disabled={isBusy} onClick={() => send(`Confirm request ${pendingId}`)}>Confirm this demo request</button>}
       {error && (
@@ -178,7 +177,7 @@ export function Chat({ isOpen, onClose }: ChatProps) {
         <button className="send" disabled={isBusy || !text.trim()} aria-label="Send message">↑</button>
       </form>
       <p className="chat-note">
-        Local demo · AI replies can contain errors ·
+        AI replies can contain errors ·
         {text.length}
         /4,000
       </p>

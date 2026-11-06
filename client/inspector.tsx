@@ -33,7 +33,7 @@ export function Inspector() {
       </div>
       <p>
         Run evaluations:
-        <code>docker compose --env-file .env.example run --rm evals</code>
+        <code>docker compose --env-file .env.example run --build --rm evals</code>
       </p>
       <label>
         Conversation ID

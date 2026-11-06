@@ -1,13 +1,13 @@
 import type { ErrorRequestHandler } from 'express'
 import type { ModelProvider } from './contracts.ts'
+import type { Variant } from './models.ts'
 import type { Store } from './store.ts'
 import express from 'express'
 import { z } from 'zod'
 import { evaluate } from './evaluations.ts'
-import { variantSchema } from './models.ts'
 import { ConversationService, HttpError } from './service.ts'
 
-export function createApp(store: Store, provider: ModelProvider) {
+export function createApp(store: Store, provider: ModelProvider, variant: Variant = 'single') {
   const app = express()
   const service = new ConversationService(store, provider)
   app.disable('x-powered-by')
@@ -27,14 +27,12 @@ export function createApp(store: Store, provider: ModelProvider) {
   app.get('/api/health', (_request, response) => response.json({ status: 'ok', mode: provider.mode }))
   app.get('/api/community', (_request, response) => response.json({
     facts: store.facts(),
-    mode: provider.mode,
   }))
   app.post('/api/conversations', (_request, response) => response.status(201).json(store.createConversation()))
   app.post('/api/conversations/:id/messages', async (request, response) => {
-    const variant = variantSchema.safeParse(request.query.variant || 'single')
-    if (!variant.success)
-      throw new HttpError(400, 'Choose a supported agent design.')
-    response.json(await service.submit(String(request.params.id), request.body, variant.data))
+    if (request.query.variant !== undefined)
+      throw new HttpError(400, 'This setting is controlled by the server.')
+    response.json(await service.submit(String(request.params.id), request.body, variant))
   })
   app.get('/api/conversations', (_request, response) => response.json(store.conversations()))
   app.get('/api/conversations/:id', (request, response) => {
