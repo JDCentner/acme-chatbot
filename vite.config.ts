@@ -1,3 +1,7 @@
-import {defineConfig} from 'vite';
+import { defineConfig } from 'vite'
 
-export default defineConfig({build: {rollupOptions: {input: 'index.html'}}});
+export default defineConfig({
+  build: {
+    rollupOptions: { input: 'index.html' },
+  },
+})

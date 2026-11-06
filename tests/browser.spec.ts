@@ -1,34 +1,37 @@
-import {test, expect} from '@playwright/test';
+import { expect, test } from '@playwright/test'
 
-test('desktop chat supports keyboard use and error recovery', async ({page}) => {
-  await page.goto('http://localhost:3000');
-  await expect(page.getByRole('heading', {name: 'Room to live. Support to thrive.'})).toBeVisible();
-  await page.getByRole('button', {name: 'Talk with Sophie'}).click();
-  const input = page.getByRole('textbox', {name: 'Your message'});
-  await expect(input).toBeFocused();
-  await input.fill('Can my dad bring his car?'); await input.press('Enter');
-  await expect(page.getByText('Residents can bring cars. Resident parking is available.')).toBeVisible();
-  await page.route('**/messages?*', route => route.fulfill({status: 503, contentType: 'application/json', body: '{"error":"Please retry."}'}));
-  await input.fill('I want a tour.'); await input.press('Enter');
-  await expect(page.getByRole('alert')).toContainText('Please retry.');
-  await page.unroute('**/messages?*');
-  await page.getByRole('button', {name: 'Retry message'}).click();
-  await expect(page.getByText('What day and time would work for your tour?')).toBeVisible();
-  await page.screenshot({path: '/tmp/acme-desktop.png', fullPage: true});
-  await input.press('Escape'); await expect(page.getByRole('dialog')).not.toBeVisible();
-});
+test('desktop chat supports keyboard use and error recovery', async ({ page }) => {
+  await page.goto('http://localhost:3000')
+  await expect(page.getByRole('heading', { name: 'Room to live. Support to thrive.' })).toBeVisible()
+  await page.getByRole('button', { name: 'Talk with Sophie' }).click()
+  const input = page.getByRole('textbox', { name: 'Your message' })
+  await expect(input).toBeFocused()
+  await input.fill('Can my dad bring his car?')
+  await input.press('Enter')
+  await expect(page.getByText('Residents can bring cars. Resident parking is available.')).toBeVisible()
+  await page.route('**/messages?*', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"Please retry."}' }))
+  await input.fill('I want a tour.')
+  await input.press('Enter')
+  await expect(page.getByRole('alert')).toContainText('Please retry.')
+  await page.unroute('**/messages?*')
+  await page.getByRole('button', { name: 'Retry message' }).click()
+  await expect(page.getByText('What day and time would work for your tour?')).toBeVisible()
+  await page.screenshot({ path: '/tmp/acme-desktop.png', fullPage: true })
+  await input.press('Escape')
+  await expect(page.getByRole('dialog')).not.toBeVisible()
+})
 
-test('mobile chat fits the viewport and opens evidence', async ({page}) => {
-  await page.setViewportSize({width: 390, height: 844});
-  await page.goto('http://localhost:3000');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
-  await page.getByRole('button', {name: 'Ask Sophie'}).click();
-  const dialog = page.getByRole('dialog');
-  const bounds = await dialog.boundingBox();
-  expect(bounds!.width).toBeLessThanOrEqual(390);
-  await page.screenshot({path: '/tmp/acme-mobile.png', fullPage: true});
-  await page.getByRole('button', {name: 'Close chat'}).click();
-  await page.getByRole('button', {name: 'Demo results'}).click();
-  await page.getByRole('button', {name: 'Conversations', exact: true}).click();
-  await expect(page.locator('.inspector pre')).toBeVisible();
-});
+test('mobile chat fits the viewport and opens evidence', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('http://localhost:3000')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
+  await page.getByRole('button', { name: 'Ask Sophie' }).click()
+  const dialog = page.getByRole('dialog')
+  const bounds = await dialog.boundingBox()
+  expect(bounds!.width).toBeLessThanOrEqual(390)
+  await page.screenshot({ path: '/tmp/acme-mobile.png', fullPage: true })
+  await page.getByRole('button', { name: 'Close chat' }).click()
+  await page.getByRole('button', { name: 'Demo results' }).click()
+  await page.getByRole('button', { name: 'Conversations', exact: true }).click()
+  await expect(page.locator('.inspector pre')).toBeVisible()
+})
