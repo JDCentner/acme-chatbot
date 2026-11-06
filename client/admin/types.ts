@@ -38,6 +38,7 @@ export interface Evaluation {
   codeChecks: Record<string, boolean>
 }
 export interface EvaluationDetail extends Evaluation {
+  grading?: { version: string }
   input: { variant: Variant, messages: string[], expectations: string }
   expectations: string
   graderError?: string

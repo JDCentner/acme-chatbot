@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 const DEFAULT_MODEL = 'gpt-6-luna'
+const DEFAULT_GRADER_MODEL = 'gpt-6.1-sol'
 const reasoningSchema = z.enum([
   'none',
   'low',
@@ -17,7 +18,7 @@ export function readModelConfiguration(environment: Record<string, string | unde
       agent: environment.AGENT_MODEL || DEFAULT_MODEL,
       classifier: environment.CLASSIFIER_MODEL || DEFAULT_MODEL,
       reviewer: environment.REVIEW_MODEL || DEFAULT_MODEL,
-      grader: environment.GRADER_MODEL || DEFAULT_MODEL,
+      grader: environment.GRADER_MODEL || DEFAULT_GRADER_MODEL,
     },
     reasoning: {
       agent: reasoningSchema.parse(environment.AGENT_REASONING_EFFORT || 'low'),

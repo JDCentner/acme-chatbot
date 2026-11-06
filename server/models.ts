@@ -4,9 +4,10 @@ import type { ReasoningEffort } from './model-config.ts'
 import process from 'node:process'
 import { Agent, run, setTracingDisabled, tool } from '@openai/agents'
 import { z } from 'zod'
-import { decisionSchema, gradeSchema, reviewSchema } from './contracts.ts'
+import { decisionSchema, reviewSchema } from './contracts.ts'
+import { TASK_GRADER_PROMPT, taskAssessmentSchema } from './grading-rubric.ts'
 import { readModelConfiguration } from './model-config.ts'
-import { AGENT_PROMPT, CLASSIFIER_PROMPT, GRADER_PROMPT, GRADING_CRITERIA, REVIEW_PROMPT } from './prompts.ts'
+import { AGENT_PROMPT, CLASSIFIER_PROMPT, REVIEW_PROMPT } from './prompts.ts'
 import { FakeProvider } from './simulation.ts'
 
 export type Variant = 'baseline' | 'single' | 'specialists'
@@ -75,9 +76,9 @@ export class LiveProvider implements ModelProvider {
   async grade(input: unknown): Promise<unknown> {
     return this.structured({
       name: 'Evaluation grader',
-      instructions: `${GRADER_PROMPT}\n${GRADING_CRITERIA}`,
+      instructions: TASK_GRADER_PROMPT,
       input,
-      schema: gradeSchema,
+      schema: taskAssessmentSchema,
       model: this.models.grader,
       effort: this.reasoning.grader,
     })

@@ -20,14 +20,17 @@ const passingGrade = {
   factualSupport: {
     passed: true,
     reasons: ['Test verdict.'],
+    evidence: [],
   },
   usefulAnswer: {
     passed: true,
     reasons: ['Test verdict.'],
+    evidence: [],
   },
   contextUse: {
     passed: true,
     reasons: ['Test verdict.'],
+    evidence: [],
   },
 }
 
@@ -45,17 +48,16 @@ test('grader receives every turn in a longer conversation', async () => {
       expectations: 'Check the complete transcript.',
       expectedRequests: [],
     })
-    const input = received as { transcript: Array<{ user: string, assistant: string, audit?: unknown, draft?: unknown }>, requests: unknown[] }
+    const input = received as { transcript: Array<{ user: string, assistant: string, audit?: unknown, draft?: unknown }> }
     assert.equal(input.transcript.length, 8)
     assert.equal(input.transcript[0].user, 'Can my dad bring his car?')
     assert.match(input.transcript[7].assistant, /parking/)
-    assert.deepEqual(input.requests, [])
     assert.ok(input.transcript.every(turn => turn.audit === undefined && turn.draft === undefined))
   }
   finally { store.close() }
 })
 
-test('missing expected request fails even when the model grader approves', async () => {
+test('demo request outcomes do not change the separate task grade', async () => {
   const store = new Store(':memory:')
   try {
     const result = await evaluate(store, gradingProvider(async () => passingGrade), {
@@ -65,9 +67,10 @@ test('missing expected request fails even when the model grader approves', async
       expectedRequests: [
         { kind: 'tour', email: 'corrected@example.com' },
       ],
-    }) as { status: string, codeChecks: { requestOutcomesMatch: boolean } }
+    }) as { status: string, codeStatus: string, codeChecks: { requestOutcomesMatch: boolean } }
     assert.equal(result.codeChecks.requestOutcomesMatch, false)
-    assert.equal(result.status, 'fail')
+    assert.equal(result.codeStatus, 'fail')
+    assert.equal(result.status, 'pass')
   }
   finally { store.close() }
 })

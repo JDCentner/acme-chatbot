@@ -1,6 +1,6 @@
 const process = require('node:process')
 
-const SUITE_VERSION = 'acme-suite-2'
+const SUITE_VERSION = 'acme-suite-3'
 class AcmeProvider {
   constructor(options) { this.config = options.config }
   id() { return `acme:${this.config.variant}` }
@@ -39,6 +39,9 @@ class AcmeProvider {
         models: run.models,
         reasoning: run.reasoning,
         codeChecks: run.codeChecks,
+        codeStatus: run.codeStatus,
+        graderVersion: run.grading?.version,
+        taskSourceHash: run.grading?.taskSourceHash,
         status: run.status,
         modelGrade: run.modelGrade,
         transcript: run.transcript.map((turn, index) => ({

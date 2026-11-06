@@ -2,8 +2,8 @@ import type { ModelProvider } from './contracts.ts'
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
-import { gradeSchema } from './contracts.ts'
-import { bounded, variantSchema } from './models.ts'
+import { gradeSnapshot } from './grading.ts'
+import { variantSchema } from './models.ts'
 import { ConversationService, HttpError } from './service.ts'
 import { Store } from './store.ts'
 
@@ -44,7 +44,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
     const turns = sandbox.turns(conversation.id)
     const transcript = turns.map(turn => ({
       user: turn.input,
-      assistant: turn.reply,
+      assistant: turn.reply || '',
       audit: JSON.parse(turn.audit),
     }))
     const hasErrors = transcript.some(turn => turn.audit.error)
@@ -63,22 +63,25 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
     }))
     const codeChecks = { noDuplicateRequests: duplicateCount === 0, noPipelineErrors: !hasErrors, requestOutcomesMatch }
     let modelGrade: unknown = null
+    let grading: unknown = null
     let graderError: string | null = null
     if (provider.mode === 'live') {
       try {
-        modelGrade = gradeSchema.parse(await bounded(provider.grade({
-          transcript: transcript.map((turn, index) => ({
-            turn: index + 1,
-            user: turn.user,
-            assistant: turn.assistant,
-            tools: turn.audit.tools || [],
-          })),
-          now: sandbox.clock().toISOString(),
-          facts: sandbox.facts(),
-          expectations: input.expectations,
-          requests,
-          codeChecks,
-        })))
+        const result = await gradeSnapshot({
+          store,
+          provider,
+          snapshot: {
+            transcript: transcript.map(turn => ({
+              user: turn.user,
+              assistant: turn.assistant,
+              tools: turn.audit.tools || [],
+            })),
+            evaluationDate: DateTime.fromJSDate(sandbox.clock(), { zone: 'America/New_York' }).toISODate()!,
+            facts: sandbox.facts(),
+          },
+        })
+        modelGrade = result.modelGrade
+        grading = result.grading
       }
       catch (error) {
         graderError = error instanceof Error
@@ -90,7 +93,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
       ? 'fixture_only'
       : graderError || hasErrors
         ? 'error'
-        : Object.values(modelGrade as z.infer<typeof gradeSchema>).every(criterion => criterion.passed) && Object.values(codeChecks).every(Boolean)
+        : Object.values(modelGrade as Record<string, { passed: boolean }>).every(criterion => criterion.passed)
           ? 'pass'
           : 'fail'
     return store.saveRun({
@@ -100,6 +103,10 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
       expectations: input.expectations,
       codeChecks,
       modelGrade,
+      grading,
+      codeStatus: Object.values(codeChecks).every(Boolean)
+        ? 'pass'
+        : 'fail',
       graderError,
       status,
       mode: provider.mode,

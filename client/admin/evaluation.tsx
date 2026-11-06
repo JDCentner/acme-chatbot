@@ -38,9 +38,18 @@ export function EvaluationView({ id }: { id: string }) {
         <span>{data.models?.agent}</span>
       </div>
       <section className="expectations">
-        <h3>Expected behavior</h3>
+        <h3>Scenario notes and demo checks</h3>
         <p>{data.expectations}</p>
       </section>
+      {data.grading && (
+        <p className="admin-notice">
+          Task grades use the demo requirements. Scenario notes and demo code checks do not add task requirements. Grader:
+          {data.models?.grader}
+          . Rules:
+          {data.grading.version}
+          .
+        </p>
+      )}
       {data.mode === 'fake' && <p className="admin-notice">Fixture runs check integration only. Model quality was not graded.</p>}
       {data.graderError && (
         <p role="alert" className="admin-error">
@@ -69,7 +78,7 @@ export function EvaluationView({ id }: { id: string }) {
         })}
       </div>
       <section className="code-checks">
-        <h3>Code checks</h3>
+        <h3>Demo code checks</h3>
         {Object.entries(data.codeChecks).map(([key, passed]) => (
           <div key={key}>
             <span>{CHECKS[key] || key}</span>
@@ -86,6 +95,7 @@ export function EvaluationView({ id }: { id: string }) {
       }))}
       />
       <RawData value={data.facts} label="Fact snapshot for this run" />
+      {data.grading && <RawData value={data.grading} label="Task requirements and grading evidence" />}
       <RawData value={data} label="Full evaluation record" />
     </>
   )

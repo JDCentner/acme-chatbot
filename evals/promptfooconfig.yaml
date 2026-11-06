@@ -42,8 +42,3 @@ defaultTest:
         const meta = context.providerResponse.metadata;
         const grade = meta.modelGrade?.contextUse;
         return {pass: meta.mode === 'live' && meta.status !== 'error' && grade?.passed === true, score: grade?.passed ? 1 : 0, reason: grade?.reasons?.join(' ') || 'Not scored: fixture mode or grader error.'};
-    - type: javascript
-      metric: Code checks
-      value: |
-        const checks = context.providerResponse.metadata.codeChecks;
-        return {pass: Object.values(checks).every(Boolean), score: Object.values(checks).every(Boolean) ? 1 : 0, reason: JSON.stringify(checks)};

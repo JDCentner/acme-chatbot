@@ -23,6 +23,8 @@
     "server",
     "client",
     "tests",
+    "evals/calibration.ts",
+    "scripts",
     "vite.config.ts"
   ]
 }

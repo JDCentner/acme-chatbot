@@ -73,6 +73,7 @@ export class Store {
       );
       CREATE TABLE IF NOT EXISTS evaluation_cases (id TEXT PRIMARY KEY, content TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS evaluation_runs (id TEXT PRIMARY KEY, content TEXT NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS evaluation_grades (id TEXT PRIMARY KEY, content TEXT NOT NULL);
     `)
     this.database.prepare('INSERT OR IGNORE INTO facts VALUES (1, ?)').run(JSON.stringify(COMMUNITY_FACTS))
     this.refreshSlots()
@@ -192,6 +193,17 @@ export class Store {
     }
     this.database.prepare('INSERT INTO evaluation_runs VALUES (?, ?, ?)').run(run.id, JSON.stringify(run), run.createdAt)
     return run
+  }
+
+  cachedGrade(id: string): unknown {
+    const row = this.database.prepare('SELECT content FROM evaluation_grades WHERE id=?').get(id) as { content: string } | undefined
+    return row
+      ? JSON.parse(row.content)
+      : undefined
+  }
+
+  cacheGrade(id: string, content: unknown): void {
+    this.database.prepare('INSERT OR IGNORE INTO evaluation_grades VALUES (?, ?)').run(id, JSON.stringify(content))
   }
 
   runs(): unknown[] {
