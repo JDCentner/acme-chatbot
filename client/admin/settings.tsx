@@ -36,7 +36,7 @@ export function SettingsView() {
         <div>
           <p className="admin-eyebrow">CONFIGURATION</p>
           <h1>Choose how Sophie works.</h1>
-          <p>Compare three designs with the same community facts and local mock tools.</p>
+          <p>Compare four designs. Each uses Luna and local mock tools.</p>
         </div>
         <a className="admin-secondary" href="/" target="_blank" rel="noreferrer">Open public site ↗</a>
       </div>
@@ -89,7 +89,7 @@ export function SettingsView() {
               <h2>Model configuration</h2>
               <span>Set in the runner environment</span>
             </div>
-            <p>The three choices above are agent designs. They use the model settings below.</p>
+            <p>The four choices above are agent designs. They use the model settings below.</p>
             <div className="model-grid">
               {Object.entries(data.models).map(([role, model]) => (
                 <div key={role}>

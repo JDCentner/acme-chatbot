@@ -1,4 +1,4 @@
-description: 'ACME: original prompt vs one agent vs Sophie with specialists. Fixture runs do not measure model quality.'
+description: 'ACME: true baseline vs better prompt vs checks vs specialists. Fixture runs do not measure model quality.'
 prompts:
   - '{{messages}}'
 providers:
@@ -6,6 +6,10 @@ providers:
     label: Original prompt
     config:
       variant: baseline
+  - id: file://provider.cjs
+    label: Better prompt + server time
+    config:
+      variant: prompt
   - id: file://provider.cjs
     label: One agent + checks
     config:

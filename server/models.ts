@@ -1,20 +1,30 @@
+import type { AgentInputItem } from '@openai/agents'
 import type { ModelContext, ModelProvider } from './contracts.ts'
 import type { ReasoningEffort } from './model-config.ts'
 import process from 'node:process'
-import { Agent, run, setTracingDisabled, tool } from '@openai/agents'
+import { Agent, run, setDefaultOpenAIClient, setTracingDisabled, tool } from '@openai/agents'
+import OpenAI from 'openai'
 import { z } from 'zod'
-import { BASELINE_PROMPT } from './baseline-prompt.ts'
+import { createBudgetFetch } from './api-budget.ts'
 import { decisionSchema, MAX_MODEL_TEXT_LENGTH, reviewSchema } from './contracts.ts'
 import { TASK_GRADER_PROMPT, taskAssessmentSchema } from './grading-rubric.ts'
 import { readModelConfiguration } from './model-config.ts'
 import { AGENT_PROMPT, CLASSIFIER_PROMPT, REVIEW_PROMPT } from './prompts.ts'
+import { buildSimpleAgent } from './simple-agent.ts'
 import { FakeProvider } from './simulation.ts'
 import { COMMUNITY_SPECIALIST_PROMPT, MANAGER_PROMPT, REQUEST_SPECIALIST_PROMPT } from './specialist-prompts.ts'
 
-export type Variant = 'baseline' | 'single' | 'specialists'
-export const variantSchema = z.enum(['baseline', 'single', 'specialists'])
+export type Variant = 'baseline' | 'prompt' | 'single' | 'specialists'
+export const variantSchema = z.enum([
+  'baseline',
+  'prompt',
+  'single',
+  'specialists',
+])
 const MODEL_TIMEOUT_MS = 25_000
 const MAX_AGENT_TURNS = 8
+const MAX_REPLY_TOKENS = 2000
+const MAX_GRADER_TOKENS = 6000
 const requestArguments = z.object({
   kind: z.enum(['tour', 'callback', 'brochure']),
   firstName: z.string(),
@@ -47,7 +57,6 @@ export class LiveProvider implements ModelProvider {
   readonly models = this.configuration.models
   readonly reasoning = this.configuration.reasoning
 
-  private readonly baseline = BASELINE_PROMPT
   constructor() {
     setTracingDisabled(true)
   }
@@ -113,8 +122,16 @@ export class LiveProvider implements ModelProvider {
       outputType: schema,
       modelSettings: {
         reasoning: { effort },
+        maxTokens: name === 'Evaluation grader'
+          ? MAX_GRADER_TOKENS
+          : MAX_REPLY_TOKENS,
       },
-    }), JSON.stringify(input), { maxTurns: 1 })
+    }), JSON.stringify(input), {
+      maxTurns: 1,
+      signal: AbortSignal.timeout(name === 'Evaluation grader'
+        ? 90_000
+        : MODEL_TIMEOUT_MS),
+    })
     return result.finalOutput
   }
 
@@ -122,10 +139,12 @@ export class LiveProvider implements ModelProvider {
     variant: Variant
     context: ModelContext
     execute: (name: string, args: unknown) => unknown
-  }): Promise<{ text: string, usage: unknown, trace: unknown }> {
+    history?: AgentInputItem[]
+  }): Promise<{ text: string, usage: unknown, trace: unknown, history?: AgentInputItem[] }> {
     const controller = new AbortController()
     const modelSettings = {
       reasoning: { effort: this.reasoning.agent },
+      maxTokens: MAX_REPLY_TOKENS,
     }
     const tools = [
       tool({
@@ -151,11 +170,9 @@ export class LiveProvider implements ModelProvider {
         execute: args => input.execute('confirm_request', args),
       }),
     ]
-    const instructions = input.variant === 'baseline'
-      ? `${this.baseline}\nRuntime adapter: This is text chat. Do not insert timed pauses or simulate telephone keys. Use the supplied server clock. Tools are local mocks; no real staff contact, delivery, or booking occurs. A server greeting was already displayed.`
-      : input.variant === 'specialists'
-        ? `${AGENT_PROMPT}\n${MANAGER_PROMPT}`
-        : AGENT_PROMPT
+    const instructions = input.variant === 'specialists'
+      ? `${AGENT_PROMPT}\n${MANAGER_PROMPT}`
+      : AGENT_PROMPT
     const community = new Agent({
       name: 'Community facts specialist',
       model: this.models.agent,
@@ -192,12 +209,17 @@ export class LiveProvider implements ModelProvider {
       instructions,
       tools: agentTools,
     })
+    const isSimple = input.variant === 'baseline' || input.variant === 'prompt'
+    const simple = isSimple
+      ? buildSimpleAgent({ ...input, model: this.models.agent, modelSettings })
+      : undefined
     const timer = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS)
     try {
-      const result = await run(agent, JSON.stringify(input.context), { maxTurns: MAX_AGENT_TURNS, signal: controller.signal })
+      const result = await run(simple?.agent || agent, simple?.messages || JSON.stringify(input.context), { maxTurns: MAX_AGENT_TURNS, signal: controller.signal })
       return {
         text: String(result.finalOutput || ''),
         usage: result.state.usage,
+        history: isSimple ? result.history : undefined,
         trace: result.newItems.map(item => ({
           type: item.type,
           agent: 'agent' in item
@@ -217,5 +239,13 @@ export function createProvider(): ModelProvider {
     return new FakeProvider()
   if (!process.env.OPENAI_API_KEY)
     throw new Error('Live mode needs OPENAI_API_KEY in the server environment.')
+  const budget = process.env.API_BUDGET_USD
+    ? createBudgetFetch({
+        limitUsd: Number(process.env.API_BUDGET_USD),
+        path: process.env.API_BUDGET_PATH,
+        fetch: globalThis.fetch,
+      })
+    : undefined
+  setDefaultOpenAIClient(new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 0, fetch: budget?.fetch }))
   return new LiveProvider()
 }

@@ -3,8 +3,10 @@ import type { Variant } from './models.ts'
 import type { Store } from './store.ts'
 import { z } from 'zod'
 import { Actions, isConfirmation } from './actions.ts'
+import { BasicActions } from './basic-actions.ts'
 import { BLOCK_REPLY, CLARIFY_REPLY, decisionSchema, DEMO_CAPABILITIES, draftSchema, FALLBACK_REPLY, MAX_MODEL_TEXT_LENGTH, messageSchema, PROMPT_VERSION, RETRY_REPLY, reviewSchema } from './contracts.ts'
 import { bounded, LiveProvider } from './models.ts'
+import { replayHistory } from './simple-agent.ts'
 import { localNow } from './time.ts'
 
 export class HttpError extends Error {
@@ -64,6 +66,10 @@ export class ConversationService {
       requestState: this.store.requestState(conversationId),
       capabilities: DEMO_CAPABILITIES,
     }
+    const isGuarded = variant === 'single' || variant === 'specialists'
+    audit.experimentProfile = isGuarded
+      ? 'guarded-v3'
+      : `${variant}-basic-tools-v1`
     let decision: string | null = null
     const finish = (reply: string, pendingId?: string) => {
       audit.durationMs = Math.round(performance.now() - started)
@@ -71,7 +77,7 @@ export class ConversationService {
       return { reply, pendingId, mode: this.provider.mode }
     }
     try {
-      if (variant !== 'baseline') {
+      if (isGuarded) {
         const hasPreviousUserTurn = context.messages.slice(0, -1).some(message => message.role === 'user')
         const isContextualConfirmation = hasPreviousUserTurn && isConfirmation(input.message, this.store.pending(conversationId)?.id)
         const classification = isContextualConfirmation
@@ -87,12 +93,16 @@ export class ConversationService {
       }
       decision = 'allow'
       this.store.database.prepare('UPDATE turns SET decision=? WHERE id=?').run(decision, id)
-      const pending = this.store.pending(conversationId)
+      const pending = isGuarded
+        ? this.store.pending(conversationId)
+        : undefined
       const confirmed = pending && isConfirmation(input.message, pending.id)
       if (!confirmed)
         this.store.invalidatePending(conversationId)
       context.pending = this.store.pending(conversationId) || null
-      const actions = new Actions(this.store)
+      const actions = isGuarded
+        ? new Actions(this.store)
+        : new BasicActions(this.store)
       const execute = (name: string, args: unknown) => {
         const result = actions.execute({
           conversationId,
@@ -110,21 +120,32 @@ export class ConversationService {
         execute('confirm_request', { pendingId: pending.id })
       let draft: string
       if (this.provider instanceof LiveProvider) {
-        const result = await this.provider.respond({ variant, context, execute })
+        const result = await this.provider.respond({
+          variant,
+          context,
+          execute,
+          history: isGuarded
+            ? undefined
+            : replayHistory(this.store.turns(conversationId)),
+        })
         draft = result.text
         audit.usage = result.usage
         audit.trace = result.trace
+        if (result.history)
+          audit.history = result.history
       }
       else {
         draft = await this.fixtureDraft(context, execute)
       }
-      const prepared = this.store.pending(conversationId)
+      const prepared = isGuarded
+        ? this.store.pending(conversationId)
+        : undefined
       if (prepared && !prepared.presented)
         draft = `${draft}\n\n${prepared.summary}`.trim()
       audit.draft = draft
       if (!draft)
         throw new Error('The agent returned no reply.')
-      if (variant !== 'baseline') {
+      if (isGuarded) {
         const checked = await this.checkReply({
           context,
           draft,

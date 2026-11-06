@@ -34,7 +34,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
   const started = performance.now()
   try {
     const service = new ConversationService(sandbox, provider)
-    const conversation = sandbox.createConversation()
+    const conversation = sandbox.createConversation(input.variant)
     for (const message of input.messages) {
       await service.submit(conversation.id, {
         message,
@@ -78,6 +78,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
             })),
             evaluationDate: DateTime.fromJSDate(sandbox.clock(), { zone: 'America/New_York' }).toISODate()!,
             facts: sandbox.facts(),
+            greeting: conversation.greeting,
           },
         })
         modelGrade = result.modelGrade
@@ -104,6 +105,7 @@ export async function evaluate(store: Store, provider: ModelProvider, body: unkn
     }
     return store.saveRun({
       input,
+      greeting: conversation.greeting,
       transcript,
       facts: sandbox.facts(),
       expectations: input.expectations,

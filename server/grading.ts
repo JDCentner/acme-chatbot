@@ -13,6 +13,7 @@ export interface GradingSnapshot {
   transcript: GradingTurn[]
   facts: Record<string, unknown>
   evaluationDate: string
+  greeting?: string
 }
 
 function validateEvidence(assessment: TaskAssessment, transcript: GradingTurn[]): TaskAssessment {
@@ -53,7 +54,7 @@ export function gradingInput(snapshot: GradingSnapshot) {
     communityFacts: snapshot.facts,
     evaluationDate: snapshot.evaluationDate,
     operationalContext: {
-      greeting: GREETING,
+      greeting: snapshot.greeting ?? GREETING,
       chatIsStored: true,
       actions: 'Local mock records only. No staff contact, real bookings, transfers, or material delivery.',
       taskGrade: 'Judge the demo requirements goals. Demo inventory and confirmation rules are reported as separate code checks.',

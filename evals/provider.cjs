@@ -1,6 +1,6 @@
 const process = require('node:process')
 
-const SUITE_VERSION = 'acme-suite-4'
+const SUITE_VERSION = 'acme-suite-5'
 class AcmeProvider {
   constructor(options) { this.config = options.config }
   id() { return `acme:${this.config.variant}` }

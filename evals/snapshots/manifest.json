@@ -1,0 +1,28 @@
+{
+  "exportedAt": "2026-11-06T22:36:07.632Z",
+  "batchId": "luna-sol-four-20261106T195604Z",
+  "promptfooEvaluationId": "eval-wSz-2026-11-06T02:13:46",
+  "snapshots": [
+    {
+      "file": "promptfoo.db.gz",
+      "compressedBytes": 518440,
+      "databaseBytes": 5804032,
+      "sha256": "8c14d50993be22fd1368addfb52a0b5f7f76806b086a9497ec410534b6d54557",
+      "rows": {
+        "evals": 1,
+        "eval_results": 180
+      }
+    },
+    {
+      "file": "acme.sqlite.gz",
+      "compressedBytes": 1684655,
+      "databaseBytes": 10510336,
+      "sha256": "d674979a9a6305e68bddb1b0d171f53897549e5193a1c1303ca01162ed95c737",
+      "rows": {
+        "evaluation_cases": 0,
+        "evaluation_runs": 180,
+        "evaluation_grades": 173
+      }
+    }
+  ]
+}

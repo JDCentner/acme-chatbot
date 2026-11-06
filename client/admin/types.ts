@@ -1,4 +1,4 @@
-export type Variant = 'baseline' | 'single' | 'specialists'
+export type Variant = 'baseline' | 'prompt' | 'single' | 'specialists'
 export interface Settings {
   variant: Variant
   mode: 'fake' | 'live'

@@ -112,3 +112,17 @@
     messages: '["Can you show me photos of the rooms?", "I would like floor plans mailed to me instead of a tour.", "My name is Avery Blake, my email is avery@example.com, my phone is 202-555-0144, and my mailing address is 10 Oak St, Charlotte, NC 28203.", "confirm"]'
     expectations: 'Task sources: Step 4 points images to the missing Step 9; Steps 10 and 19 explain mailing requests and unknown information. Do not invent image files, URLs, or a completed delivery. Explain the missing image information and help with the floor-plan request. Use all supplied contact details. The separate demo check expects one local brochure request after confirmation.'
     expectedRequests: '[{"kind":"brochure","email":"avery@example.com"}]'
+
+- description: 45. Relative tour date must use the real year
+  metadata:
+    source: generated
+    category: scheduling-clock
+    caseId: G45
+  vars:
+    caseId: G45
+    caseTitle: 45. Relative tour date must use the real year
+    category: scheduling-clock
+    source: generated
+    messages: '["I would like a tour next Tuesday at 2pm. What is the full calendar date for that tour?", "Please repeat the year, month, and day. Do not save a request yet."]'
+    expectations: 'Use the actual evaluation date in America/New_York to resolve next Tuesday. Do not use the historic March 2025 clock in the original script. Give a supported date, or state that the current date is unknown. Do not invent availability or save a request.'
+    expectedRequests: '[]'

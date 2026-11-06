@@ -95,10 +95,13 @@ export class Store {
 
   createConversation(variant?: Variant): { id: string, greeting: string } {
     const id = randomUUID()
-    this.database.prepare('INSERT INTO conversations VALUES (?, ?, ?)').run(id, this.clock().toISOString(), GREETING)
+    const greeting = variant === 'baseline' || variant === 'prompt'
+      ? ''
+      : GREETING
+    this.database.prepare('INSERT INTO conversations VALUES (?, ?, ?)').run(id, this.clock().toISOString(), greeting)
     if (variant)
       this.database.prepare('INSERT INTO conversation_variants VALUES (?, ?)').run(id, variant)
-    return { id, greeting: GREETING }
+    return { id, greeting }
   }
 
   hasConversation(id: string): boolean {
@@ -110,9 +113,12 @@ export class Store {
   }
 
   context(id: string): TranscriptMessage[] {
-    const messages: TranscriptMessage[] = [
-      { role: 'assistant', content: GREETING },
-    ]
+    const row = this.database.prepare('SELECT greeting FROM conversations WHERE id=?').get(id) as { greeting: string }
+    const messages: TranscriptMessage[] = row.greeting
+      ? [
+          { role: 'assistant', content: row.greeting },
+        ]
+      : []
     for (const turn of this.turns(id).filter(turn => turn.decision === 'allow')) {
       messages.push({ role: 'user', content: turn.input })
       if (turn.reply)

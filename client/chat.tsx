@@ -40,13 +40,15 @@ export function Chat({ isOpen, onClose }: ChatProps) {
         const created = await api<{ id: string, greeting: string }>('/conversations', {})
         id = created.id
         setConversationId(id)
-        setMessages([
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            text: created.greeting,
-          },
-        ])
+        setMessages(created.greeting
+          ? [
+              {
+                id: crypto.randomUUID(),
+                role: 'assistant',
+                text: created.greeting,
+              },
+            ]
+          : [])
       }
       const submission = retryRef.current?.message === message
         ? retryRef.current

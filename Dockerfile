@@ -5,7 +5,12 @@ ENV COREPACK_DEFAULT_TO_LATEST=0
 RUN corepack enable && corepack prepare pnpm@12.10.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
-COPY . .
+COPY server ./server
+COPY client ./client
+COPY evals ./evals
+COPY scripts ./scripts
+COPY tests ./tests
+COPY *.html *.ts eslint.config.mjs tsconfig.json ./
 RUN pnpm lint && pnpm test && pnpm build
 
 FROM build AS runtime

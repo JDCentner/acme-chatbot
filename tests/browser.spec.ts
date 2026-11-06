@@ -84,6 +84,12 @@ test('old review URL opens the separate admin workspace', async ({ page }) => {
 test('admin design changes persist and apply only to new chats', async ({ page, request }) => {
   const existing = await (await request.post('/api/conversations')).json()
   await page.goto('/admin')
+  await expect(page.getByRole('radio')).toHaveCount(4)
+  await page.getByRole('radio', { name: 'Better prompt + server time' }).check()
+  await page.getByRole('button', { name: 'Use this design' }).click()
+  await expect(page.getByRole('status')).toContainText('Design saved.')
+  await page.reload()
+  await expect(page.getByRole('radio', { name: 'Better prompt + server time' })).toBeChecked()
   await page.getByRole('radio', { name: 'Original prompt' }).check()
   await page.getByRole('button', { name: 'Use this design' }).click()
   await expect(page.getByRole('status')).toContainText('Design saved.')

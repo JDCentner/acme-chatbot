@@ -5,6 +5,8 @@ services:
     environment:
       MODEL_MODE: ${MODEL_MODE:-fake}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      API_BUDGET_USD: ${API_BUDGET_USD:-}
+      API_BUDGET_PATH: /app/data/evaluation-budget.json
       AGENT_MODEL: ${AGENT_MODEL:-gpt-6-luna}
       CLASSIFIER_MODEL: ${CLASSIFIER_MODEL:-gpt-6-luna}
       REVIEW_MODEL: ${REVIEW_MODEL:-gpt-6-luna}

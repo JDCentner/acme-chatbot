@@ -41,6 +41,9 @@ export async function regradeSavedRun(input: { store: Store, provider: ModelProv
       provider,
       snapshot: {
         facts: source.facts,
+        greeting: typeof source.greeting === 'string'
+          ? source.greeting
+          : undefined,
         evaluationDate: DateTime.fromISO(source.createdAt).setZone('America/New_York').toISODate()!,
         transcript: source.transcript.map(turn => ({ user: turn.user, assistant: turn.assistant, tools: turn.audit.tools || [] })),
       },
